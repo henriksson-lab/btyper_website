@@ -1,0 +1,3 @@
+column_id	column_type	default	v1	v2
+sample	text	nosample	0	0
+strain	text	nostrain	0	0
