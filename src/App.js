@@ -94,7 +94,7 @@ class SearchField extends React.Component {
 class SearchForm extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {value: '', fields : []};
+    this.state = {fields : []};
 
     this.search_callback=props.search_callback;
 
@@ -104,8 +104,7 @@ class SearchForm extends React.Component {
 
     this.field_components = [];
 
-    this.handleChange = this.handleChange.bind(this);
-    this.addFilter = this.addFilter.bind(this);
+    this.handleAddFilter = this.handleAddFilter.bind(this);
     this.addFilterNamed = this.addFilterNamed.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
   }
@@ -139,7 +138,7 @@ class SearchForm extends React.Component {
   }
 
 
-  addFilter() {
+  handleAddFilter() {
     this.addFilterNamed("strain");
   }
 
@@ -151,17 +150,13 @@ class SearchForm extends React.Component {
     this.search_callback(query);
   }
 
-  handleChange(event) {
-    this.setState({value: event.target.value});
-  }
-
   render() {
     return (
       <div>
         <div>
           { this.state.fields }
         </div>
-        <button className="buttonspacer" onClick={this.addFilter}>Add filter</button>
+        <button className="buttonspacer" onClick={this.handleAddFilter}>Add filter</button>
         <button className="buttonspacer" onClick={this.handleSearch}>Search</button>
       </div>
     );
