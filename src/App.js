@@ -114,7 +114,6 @@ class SearchForm extends React.Component {
       fetch('rest/column_desc')
           .then((response) => response.json())
           .then((responseJson) => {
-            //console.log(responseJson)
             this.fieldmeta = responseJson;
             this.dict_fieldmeta = Object.fromEntries(this.fieldmeta.map(x => [x.column_id, x]));
 
@@ -145,15 +144,12 @@ class SearchForm extends React.Component {
   }
 
   handleSearch() {
-console.log("search");
     var query=[];
     for (const c of this.field_components) {
       query.push(c.getQuery());
     }
     this.search_callback(query);
-//{apa:"fooooooooooo"});
   }
-
 
   handleChange(event) {
     this.setState({value: event.target.value});
@@ -224,12 +220,12 @@ console.log(this.state);
   }
 
   render() {
-
+/*
 console.log("re");
 console.log(this.props);
 console.log(this.state);
 console.log("reeee");
-
+*/
     var straindata = this.state.straindata;
 
 
