@@ -11,40 +11,42 @@ class SearchField extends React.Component {
 
   constructor(props, fieldmeta) {
     super(props);
-    this.fieldmeta = fieldmeta
+    this.fieldmeta = props.fieldmeta;
 //    this.fieldmeta = []
     this.state = {field: props.field, value: props.value};
 
 //    this.handleChange = this.handleChange.bind(this);
-    this.handleChangeField = this.handleChangeField.bind(this);
-    this.handleChangeValue = this.handleChangeValue.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
 
-  handleChangeField(event) {
-    var newstate = this.state;
-    newstate.field = event.target.value;
-    this.setState(newstate);
+  handleChange(event) {
+    const target = event.target;
+//    var partialstate = {}; //this.state;
+    if(target.name==="delete"){}
+    else if(target.name==="selectfield"){
+//      partialstate["field"] = event.target.value;
+      this.setState({field:event.target.value});
+    } else if(target.name==="value"){
+  //    partialstate["value"] = event.target.value;
+      this.setState({value:event.target.value});
+    }
+
   }
 
-  handleChangeValue(event) {
-    var newstate = this.state;
-    newstate.value = event.target.value;
-    this.setState(newstate);
-  }
 
 
   render() {
     var html = (
         <label>
-          <button>X</button>
-          <select value={this.state.field} onChange={this.handleChangeField}>
+          <button onChange={this.handleChange} name="delete">X</button>
+          <select value={this.state.field} onChange={this.handleChange} name="selectfield">
                 {
                     this.fieldmeta.map((item, index) => (
                         <option value={item.column_id} key={this.key+"--"+index }>{item.column_id}</option>
                     ))
                 }
           </select>
-          <input type="text" value={this.state.value} onChange={this.handleChangeValue} />
+          <input type="text" value={this.state.value} onChange={this.handleChange} name="value"/>
         </label>
     );
     return html;
@@ -75,10 +77,9 @@ class SearchForm extends React.Component {
           .then((responseJson) => {
             //console.log(responseJson)
             this.fieldmeta = responseJson;
-
             this.setState({
               value:"",
-              fields:[new SearchField({field:"sample", value:"", key:this.nextkey++}, this.fieldmeta)]
+              fields:[(<SearchField field="sample" value="xxx" key={this.nextkey++} fieldmeta={this.fieldmeta}/>)]
             })
           })
           .catch((error) => {
@@ -93,18 +94,18 @@ class SearchForm extends React.Component {
   }
 
   handleSubmit(event) {
-    alert('A name was submitted: ' + this.state.value);
+//    alert('A name was submitted: ' + this.state.value);
     event.preventDefault();
   }
 
   render() {
-////////////////////////// key missing??
     return (
       <form onSubmit={this.handleSubmit}>
         <div>
-        { this.state.fields.map((item) => item.render()) }
+        { this.state.fields }
         </div>
-        <input type="submit" value="Submit" />
+        <input type="submit" value="Add filter" />
+        <input type="submit" value="Search" />
       </form>
     );
   }
@@ -126,9 +127,6 @@ class TheTable extends React.Component {
       fetch('rest/straindata')
           .then((response) => response.json())
           .then((responseJson) => {
-
-            //console.log(responseJson)
-
             this.setState({
               straindata:responseJson
             })
@@ -145,29 +143,29 @@ class TheTable extends React.Component {
     var straindata = this.state.straindata;
     //console.log(straindata);
 
-    if(straindata.length==0){
+    if(straindata.length===0){
        straindata={"column_id":[]}
     }
 
     var colnames=Object.keys(straindata);
 
-    function getrow(row_i){
-      return (<tr>{colnames.map(cname => (<td>{straindata[cname][row_i]}</td>))}</tr>);
-    }
-
 //    var num_rows = straindata["column_id"].length;
     var num_rows = Object.keys(straindata["column_id"]).length;  //ugly. should not have row indices on each entry
     var row_nums = Array.from(Array(num_rows).keys())
+
+    var fieldid=0;
 
     return (
       <table>
         <thead>
           <tr>
-            {colnames.map(cname => (<td>{cname}</td>))}
+            {colnames.map(cname => (<td key={fieldid++}>{cname}</td>))}
           </tr>
         </thead>
         <tbody>
-          {row_nums.map(row_i => getrow(row_i))}
+          {row_nums.map(row_i =>
+                (<tr key={fieldid++}>{colnames.map(cname => (<td key={fieldid++}>{straindata[cname][row_i]}</td>))}</tr>)
+          )}
         </tbody>
       </table>
     );
@@ -189,11 +187,20 @@ function App() {
         <p>
           BTyper - by Carroll lab
         </p>
-        <SearchForm/>
-        <TheTable/>
       </header>
-
-
+      <div className="App-divider">
+        Filter strains
+      </div>
+        <SearchForm/>
+      <div className="App-divider">
+        Strains across the world
+      </div>
+       Map here
+      <div className="App-divider">
+        Entries
+      </div>
+        <TheTable/>
+<SearchField field="bar" value="xxx" fieldmeta={[{column_id:"bar"},{column_id:"whee"}]}/>
     </div>
   );
 }
