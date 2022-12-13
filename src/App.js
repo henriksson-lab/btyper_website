@@ -20,35 +20,23 @@ class SearchField extends React.Component {
 ////
 
 
-    this.state = {field: props.field, value: props.value, value2: props.value2};
+    this.state = {field: props.field, value: props.value, value2: props.value2, id: props.id};
     this.handleChange = this.handleChange.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
 
+    this.searchform.field_components.push(this);
   }
 
   handleDelete(event) {
-      console.log("delete!!!");
-      console.log(this.searchform.state.fields);
-
-      console.log("delete!aoeaoeaoe!!");
-
-      const foo=this.searchform.state.fields.findIndex(e => e._self==this)
-console.log(foo);
-
-const index = this.searchform.state.fields.map(e => e.key).indexOf(this.key);
-
-console.log(this.key);
-console.log(index);
-//wich has this key?
-
+    const ind=this.searchform.state.fields.findIndex(e => e.key===""+this.state.id);
+    this.searchform.state.fields.splice(ind,1);
+    this.searchform.field_components.filter(e => e.state.id != this.state.id);
+    this.searchform.setState({fields: this.searchform.state.fields});
   }
 
   handleChange(event) {
     const target = event.target;
-    if(target.name==="bDelete"){
-      console.log("delete!!!");
-      console.log(this.searchform.state.fields);
-    } else if(target.name==="selectfield"){
+    if(target.name==="selectfield"){
       this.setState({field:event.target.value});
     } else if(target.name==="value"){
       this.setState({value:event.target.value});
@@ -60,14 +48,9 @@ console.log(index);
 
 
   render() {
-
     var inputfield=[];
 
     var current_fieldmeta = this.dict_fieldmeta[this.state.field];
-
-console.log(current_fieldmeta);
-//console.log(this.dict_fieldmeta);
-
     if(current_fieldmeta.column_type==="text"){
       inputfield.push((<label>
         {'\u00A0'} is: <input type="text" value={this.state.value} onChange={this.handleChange} name="value"/>
@@ -108,11 +91,16 @@ class SearchForm extends React.Component {
     this.state = {value: '', fields : []};
 
     this.fieldmeta = null;
+    this.dict_fieldmeta = {};
     this.nextkey = 1;
+
+    this.field_components = [];
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.addFilter = this.addFilter.bind(this);
+    this.addFilterNamed = this.addFilterNamed.bind(this);
+    this.handleSearch = this.handleSearch.bind(this);
   }
 
   componentDidMount() {
@@ -121,31 +109,40 @@ class SearchForm extends React.Component {
           .then((responseJson) => {
             //console.log(responseJson)
             this.fieldmeta = responseJson;
-            this.setState({
-              value:"",
-              fields:[
-                (<SearchField searchform={this} field="strain" value="" key={this.nextkey++} fieldmeta={this.fieldmeta}/>),
-                (<SearchField searchform={this} field="N50" value="20000" value2="10000000" key={this.nextkey++} fieldmeta={this.fieldmeta}/>),
-                (<SearchField searchform={this} field="Completeness" value="95" value2="100" key={this.nextkey++} fieldmeta={this.fieldmeta}/>),
-                (<SearchField searchform={this} field="Contamination" value="0" value2="5" key={this.nextkey++} fieldmeta={this.fieldmeta}/>)
-              ]
-            })
+            this.dict_fieldmeta = Object.fromEntries(this.fieldmeta.map(x => [x.column_id, x]));
+
+            this.state.fields=[];
+            this.addFilterNamed("strain");
+            this.addFilterNamed("N50");
+            this.addFilterNamed("Completeness");
+            this.addFilterNamed("Contamination");
           })
           .catch((error) => {
             console.error(error);
           });
   }
 
-
-  addFilter() {
-console.log("aeaoe");
+  addFilterNamed(column_id) {
     var curfields = this.state.fields;
+    const newkey=this.nextkey++;
+    var current_fieldmeta = this.dict_fieldmeta[column_id];
     curfields.push(
-                (<SearchField field="strain" value="" key={this.nextkey++} fieldmeta={this.fieldmeta}/>)
+                (<SearchField field={column_id} value={current_fieldmeta.v1} value2={current_fieldmeta.v2} key={newkey} id={newkey} fieldmeta={this.fieldmeta} searchform={this}/>)
     );
     this.setState({fields:curfields});
   }
 
+
+  addFilter() {
+    this.addFilterNamed("strain");
+  }
+
+  handleSearch() {
+console.log("search");
+     //Collect data from each entry TODO
+
+
+  }
 
 
   handleChange(event) {
@@ -161,10 +158,10 @@ console.log("aeaoe");
     return (
       <form onSubmit={this.handleSubmit}>
         <div>
-        { this.state.fields }
+          { this.state.fields }
         </div>
         <button className="buttonspacer" onClick={this.addFilter}>Add filter</button>
-        <input type="submit" value="Search" className="buttonspacer" />
+        <button className="buttonspacer" onClick={this.handleSearch}>Search</button>
       </form>
     );
   }
@@ -180,6 +177,13 @@ class TheTable extends React.Component {
   constructor(props) {
     super(props);
     this.state = {straindata: []};
+
+
+    this.handleFastaAll = this.handleFastaAll.bind(this);
+    this.handleFastaSelected = this.handleFastaSelected.bind(this);
+    this.handleStrainlistAll = this.handleStrainlistAll.bind(this);
+    this.handleStrainlistSelected = this.handleStrainlistSelected.bind(this);
+
   }
 
   componentDidMount() {
@@ -196,6 +200,14 @@ class TheTable extends React.Component {
   }
 
 
+  handleFastaAll(){
+  }
+  handleFastaSelected(){
+  }
+  handleStrainlistAll(){
+  }
+  handleStrainlistSelected(){
+  }
 
   render() {
 
@@ -216,10 +228,10 @@ class TheTable extends React.Component {
 
     return (
       <form>
-      <button name="bFastaAll" className="buttonspacer">Download all FASTA</button>
-      <button name="bFastaSelected" className="buttonspacer">Download selected FASTA</button>
-      <button name="bStrainlistAll" className="buttonspacer">Download list of all strains</button>
-      <button name="bStrainlistSelected" className="buttonspacer">Download list of selected strains</button>
+      <button name="bFastaAll" className="buttonspacer" onClick={this.handleFastaAll}>Download all FASTA</button>
+      <button name="bFastaSelected" className="buttonspacer" onClick={this.handleFastaSelected}>Download selected FASTA</button>
+      <button name="bStrainlistAll" className="buttonspacer" onClick={this.handleStrainlistAll}>Download list of all strains</button>
+      <button name="bStrainlistSelected" className="buttonspacer" onClick={this.handleStrainlistSelected}>Download list of selected strains</button>
       <table>
         <thead>
           <tr>

@@ -9,7 +9,6 @@ coldesc = pd.read_csv("column_desc.csv",sep="\t")
 
 new_coldesc = pd.DataFrame(data={"column_id":f.columns})
 new_coldesc["column_type"]="text"
-new_coldesc["default"]=""
 new_coldesc["v1"]=""
 new_coldesc["v2"]=""
 
