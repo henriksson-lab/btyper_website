@@ -14,6 +14,26 @@
 }
 
 
+table.divtable2 {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+div.divSearchField {
+    text-align: left;
+}
+
+div.divtable {
+position: absolute;
+    left: 50px;
+    width: calc(100% - 100px);
+
+/*  width: 500px;*/
+  height: 500px;
+  overflow: auto;
+}
+
 
 .App-header {
   background-color: #282c34;
@@ -26,14 +46,38 @@
   color: white;
 }
 
+.withspacer {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.buttonspacer {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  margin-left: 5px;
+  margin-right: 5px;
+
+color: #fff;
+  background-color: #337ab7;
+  border-color: #2e6da4;
+
+/*
+  color: #333;
+  background-color: #fff;
+  border-color: #ccc;
+*/
+}
+
+
+
 .App-divider {
   background-color: #FF1493;
-  min-height: 5vh;
+  min-height: 3vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  font-size: calc(10px + 1vmin);
   color: white;
 }
 
