@@ -1,4 +1,4 @@
-from flask import Flask, render_template, send_from_directory, send_file
+from flask import Flask, render_template, send_from_directory, send_file, request
 #from flask_cors import CORS
 
 import pandas as pd
@@ -19,12 +19,50 @@ def column_desc():
     #return send_file('column_desc.csv')
 
 
-@app.route("/straindata")
+def formatOneConstraint(c):
+    #if c["type"]:
+    c.field
+
+#[{'field': 'strain', 'value': 'nostrain', 'value2': 0, 'id': 5}, {'field': 'strain', 'value': 'nostrain', 'value2': 0, 'id': 5}, {'field': 'N50', 'value': '20000', 'value2': 1000000, 'id': 6}, {'field': 'N50', 'value': '20000', 'value2': 1000000, 'id': 6}, {'field': 'Completeness', 'value': '95', 'value2': 100, 'id': 7}, {'field': 'Completeness', 'value': '95', 'value2': 100, 'id': 7}, {'field': 'Contamination', 'value': '0', 'value2': 5, 'id': 8}, {'field': 'Contamination', 'value': '0', 'value2': 5, 'id': 8}]
+
+@app.route("/straindata", methods=['GET', 'POST'])
 def gettable():
+    content = request.json
+    print(content)
+    list_constraint=[]
+    list_vars=[]
+    for c in content:
+      list_constraint.append("? = ?")
+      list_vars.append(c["field"])
+      list_vars.append(c["value"])
+
+    constraint = " AND ".join(list_constraint)
+#    if constraint=="":
+#      constraint="*"
+
+    print(constraint)
+    print(list_vars)
+
     conn = sql.connect('data.sqlite')
-    df = pd.read_sql_query("SELECT * from straindata limit 100", conn)
+    cursor = conn.cursor()
+    if constraint=="":
+      cursor.execute("SELECT * from straindata limit 100")
+    else:
+      cursor.execute("SELECT * from straindata where "+constraint+" limit 100", list_vars)
+#    df = pd.read_sql_query("SELECT "+constraint+" from straindata limit 100", conn, paramrs)
+    df=pd.DataFrame(cursor.fetchall())
+
     conn.close()
-    return df.to_json()
+
+    if df.shape[0]>0:
+      num_fields = len(cursor.description)
+      field_names = [i[0] for i in cursor.description]
+      df.columns= field_names
+      print(df)
+      return df.to_json()
+    else:
+      print("empty")
+      return "[]"
 
 
 

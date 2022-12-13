@@ -36,7 +36,7 @@ class SearchField extends React.Component {
   handleDelete(event) {
     const ind=this.searchform.state.fields.findIndex(e => e.key===""+this.state.id);
     this.searchform.state.fields.splice(ind,1);
-    this.searchform.field_components.filter(e => e.state.id != this.state.id);
+    this.searchform.field_components = this.searchform.field_components.filter(e => e.state.id != this.state.id);
     this.searchform.setState({fields: this.searchform.state.fields});
   }
 
@@ -117,6 +117,8 @@ class SearchForm extends React.Component {
             this.dict_fieldmeta = Object.fromEntries(this.fieldmeta.map(x => [x.column_id, x]));
 
             this.state.fields=[];
+            this.field_components=[];
+
             this.addFilterNamed("strain");
             this.addFilterNamed("N50");
             this.addFilterNamed("Completeness");
@@ -190,8 +192,10 @@ class TheTable extends React.Component {
 console.log("update");
 console.log(this.state);
 */
+
+
     if(query!==null & this.state.straindata===null){
-      fetch('rest/straindata')
+      fetch('rest/straindata', {method: 'POST', headers: {'Content-Type': 'application/json'}, body:JSON.stringify(query)})
           .then((response) => response.json())
           .then((responseJson) => {
             this.setState({
@@ -215,12 +219,12 @@ console.log(this.state);
   }
 
   render() {
-/*
+
 console.log("re");
 console.log(this.props);
 console.log(this.state);
 console.log("reeee");
-*/
+
     var straindata = this.state.straindata;
 
 
