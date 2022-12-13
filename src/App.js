@@ -2,7 +2,7 @@
 import './App.css';
 
 import React from 'react';
-
+import * as ReactDOM from 'react-dom/client';
 
 /////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -23,9 +23,15 @@ class SearchField extends React.Component {
     this.state = {field: props.field, value: props.value, value2: props.value2, id: props.id};
     this.handleChange = this.handleChange.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
+    this.getQuery = this.getQuery.bind(this);
 
     this.searchform.field_components.push(this);
   }
+
+  getQuery(){
+    return this.state;
+  }
+
 
   handleDelete(event) {
     const ind=this.searchform.state.fields.findIndex(e => e.key===""+this.state.id);
@@ -90,6 +96,8 @@ class SearchForm extends React.Component {
     super(props);
     this.state = {value: '', fields : []};
 
+    this.search_callback=props.search_callback;
+
     this.fieldmeta = null;
     this.dict_fieldmeta = {};
     this.nextkey = 1;
@@ -97,7 +105,6 @@ class SearchForm extends React.Component {
     this.field_components = [];
 
     this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
     this.addFilter = this.addFilter.bind(this);
     this.addFilterNamed = this.addFilterNamed.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
@@ -139,9 +146,12 @@ class SearchForm extends React.Component {
 
   handleSearch() {
 console.log("search");
-     //Collect data from each entry TODO
-
-
+    var query=[];
+    for (const c of this.field_components) {
+      query.push(c.getQuery());
+    }
+    this.search_callback(query);
+//{apa:"fooooooooooo"});
   }
 
 
@@ -149,20 +159,15 @@ console.log("search");
     this.setState({value: event.target.value});
   }
 
-  handleSubmit(event) {
-//    alert('A name was submitted: ' + this.state.value);
-    event.preventDefault();
-  }
-
   render() {
     return (
-      <form onSubmit={this.handleSubmit}>
+      <div>
         <div>
           { this.state.fields }
         </div>
         <button className="buttonspacer" onClick={this.addFilter}>Add filter</button>
         <button className="buttonspacer" onClick={this.handleSearch}>Search</button>
-      </form>
+      </div>
     );
   }
 }
@@ -176,17 +181,25 @@ console.log("search");
 class TheTable extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {straindata: []};
 
+    this.state = {
+      straindata: null,
+      query: null
+    };
 
     this.handleFastaAll = this.handleFastaAll.bind(this);
     this.handleFastaSelected = this.handleFastaSelected.bind(this);
     this.handleStrainlistAll = this.handleStrainlistAll.bind(this);
     this.handleStrainlistSelected = this.handleStrainlistSelected.bind(this);
-
+    this.asynchUpdate = this.asynchUpdate.bind(this);
   }
 
-  componentDidMount() {
+  asynchUpdate(query){
+/*
+console.log("update");
+console.log(this.state);
+*/
+    if(query!==null & this.state.straindata===null){
       fetch('rest/straindata')
           .then((response) => response.json())
           .then((responseJson) => {
@@ -197,6 +210,7 @@ class TheTable extends React.Component {
           .catch((error) => {
             console.error(error);
           });
+    }
   }
 
 
@@ -211,11 +225,26 @@ class TheTable extends React.Component {
 
   render() {
 
+console.log("re");
+console.log(this.props);
+console.log(this.state);
+console.log("reeee");
+
     var straindata = this.state.straindata;
-    //console.log(straindata);
+
+
+    if(this.props.query!==this.state.query){
+      this.setState({query:this.props.query, straindata:null})
+      this.asynchUpdate(this.props.query);
+      return "Loading data...";
+    }
+
+    if(!straindata){
+       return "";
+    }
 
     if(straindata.length===0){
-       straindata={"strain":[]}
+       return "No data to show"
     }
 
     var colnames=Object.keys(straindata);
@@ -226,8 +255,9 @@ class TheTable extends React.Component {
 
     var fieldid=0;
 
+
     return (
-      <form>
+      <div>
       <button name="bFastaAll" className="buttonspacer" onClick={this.handleFastaAll}>Download all FASTA</button>
       <button name="bFastaSelected" className="buttonspacer" onClick={this.handleFastaSelected}>Download selected FASTA</button>
       <button name="bStrainlistAll" className="buttonspacer" onClick={this.handleStrainlistAll}>Download list of all strains</button>
@@ -248,47 +278,57 @@ class TheTable extends React.Component {
           )}
         </tbody>
       </table>
-      </form>
+      </div>
     );
   }
 }
 
 
 
-
-
 /////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////
-function App() {
+class App extends React.Component {
 
-  return (
-    <div className="App">
-      <header className="App-header">
-        <p>
-          BTyper - by Carroll lab
-        </p>
-      </header>
-      <div className="App-divider">
-        Filter strains
+  constructor(props) {
+    super(props);
+    this.state = {straindata:null, query:null}
+    this.handleSearch = this.handleSearch.bind(this);
+  }
+
+  handleSearch(q){
+    this.setState({query:q, straindata:null});
+  }
+
+  render() {
+    return (
+      <div className="App">
+        <header className="App-header">
+          <p>
+            BTyper - by Carroll lab
+          </p>
+        </header>
+        <div className="App-divider">
+          Filter strains
+        </div>
+        <div className="withspacer">
+          <SearchForm search_callback={this.handleSearch}/>
+        </div>
+        <div className="App-divider">
+          Strains across the world
+        </div>
+        <div className="withspacer">
+            Map here
+        </div>
+        <div className="App-divider">
+          Entries
+        </div>
+        <div className="divtable" id="divfortable">
+          <TheTable query={this.state.query} straindata={this.state.straindata}/>
+        </div>
       </div>
-      <div className="withspacer">
-        <SearchForm/>
-      </div>
-      <div className="App-divider">
-        Strains across the world
-      </div>
-      <div className="withspacer">
-          Map here
-      </div>
-      <div className="App-divider">
-        Entries
-      </div>
-      <div className="divtable">
-        <TheTable/>
-      </div>
-    </div>
-  );
+    );
+  }
 }
 
 
