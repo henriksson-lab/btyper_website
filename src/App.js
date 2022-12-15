@@ -12,20 +12,14 @@ class SearchField extends React.Component {
   constructor(props) {
     super(props);
     this.fieldmeta = props.fieldmeta;
-    this.searchform = props.searchform;
     this.dict_fieldmeta = Object.fromEntries(props.fieldmeta.map(x => [x.column_id, x]));
 
-    //TODO. look up the standard values here
-    var current_fieldmeta = this.dict_fieldmeta[props.field];
-////
+    this.handleDeleteCB=props.handleDelete;
+    this.handleChangeCB=props.handleChange;
 
-
-    this.state = {field: props.field, value: props.value, value2: props.value2, id: props.id};
     this.handleChange = this.handleChange.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.getQuery = this.getQuery.bind(this);
-
-    this.searchform.field_components.push(this);
   }
 
   getQuery(){
@@ -34,47 +28,62 @@ class SearchField extends React.Component {
 
 
   handleDelete(event) {
-    const ind=this.searchform.state.fields.findIndex(e => e.key===""+this.state.id);
-    this.searchform.state.fields.splice(ind,1);
-    this.searchform.field_components = this.searchform.field_components.filter(e => e.state.id != this.state.id);
-    this.searchform.setState({fields: this.searchform.state.fields});
+    this.handleDeleteCB(this.props.id);
   }
 
   handleChange(event) {
     const target = event.target;
+    var state = {
+        field: this.props.field,
+        value: this.props.value,
+        value2: this.props.value2,
+        id: this.props.id
+    };
     if(target.name==="selectfield"){
-      this.setState({field:event.target.value});
+      state.field = event.target.value;
+      var fieldmeta = this.dict_fieldmeta[state.field];
+      state.value = fieldmeta.v1;
+      state.value2 = fieldmeta.v2;
     } else if(target.name==="value"){
-      this.setState({value:event.target.value});
+      state.value = event.target.value;
     } else if(target.name==="value2"){
-      this.setState({value2:event.target.value2});
+      state.value2 = event.target.value
     }
+    this.handleChangeCB(state);
   }
 
 
 
   render() {
+    var state = {
+        field: this.props.field,
+        value: this.props.value,
+        value2: this.props.value2,
+        id: this.props.id
+    };
     var inputfield=[];
 
-    var current_fieldmeta = this.dict_fieldmeta[this.state.field];
+//    this.handleChangeCB(this.state); //not the ideal place but works?
+
+    var current_fieldmeta = this.dict_fieldmeta[state.field];
     if(current_fieldmeta.column_type==="text"){
       inputfield.push((<label>
-        {'\u00A0'} is: <input type="text" value={this.state.value} onChange={this.handleChange} name="value"/>
+        {'\u00A0'} is: <input type="text" value={state.value} onChange={this.handleChange} name="value"/>
       </label>));
     } else if(current_fieldmeta.column_type==="number"){
       inputfield.push((<label>
-        {'\u00A0'} From: <input type="text" value={this.state.value} onChange={this.handleChange} name="value"/>
-        {'\u00A0'} To:   <input type="text" value={this.state.value2} onChange={this.handleChange} name="value2"/>
+        {'\u00A0'} From: <input type="text" value={state.value} onChange={this.handleChange} name="value"/>
+        {'\u00A0'} To:   <input type="text" value={state.value2} onChange={this.handleChange} name="value2"/>
       </label>));
     }
 
     var html = (
         <div className="divSearchField">
           <button onClick={this.handleDelete} name="bDelete" className="buttonspacer">X</button>
-          <select value={this.state.field} onChange={this.handleChange} name="selectfield">
+          <select value={state.field} onChange={this.handleChange} name="selectfield">
                 {
                     this.fieldmeta.map((item, index) => (
-                        <option value={item.column_id} key={this.key+"--"+index }>{item.column_id}</option>
+                        <option value={item.column_id} key={state.id+"--"+index }>{item.column_id}</option>
                     ))
                 }
           </select>
@@ -94,7 +103,9 @@ class SearchField extends React.Component {
 class SearchForm extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {fields : []};
+    this.state = {
+        fields : []
+    };
 
     this.search_callback=props.search_callback;
 
@@ -102,11 +113,13 @@ class SearchForm extends React.Component {
     this.dict_fieldmeta = {};
     this.nextkey = 1;
 
-    this.field_components = [];
-
     this.handleAddFilter = this.handleAddFilter.bind(this);
     this.addFilterNamed = this.addFilterNamed.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
+
+    this.handleFieldChange = this.handleFieldChange.bind(this);
+    this.handleFieldDelete = this.handleFieldDelete.bind(this);
+
   }
 
   componentDidMount() {
@@ -116,47 +129,76 @@ class SearchForm extends React.Component {
             this.fieldmeta = responseJson;
             this.dict_fieldmeta = Object.fromEntries(this.fieldmeta.map(x => [x.column_id, x]));
 
-            this.state.fields=[];
-            this.field_components=[];
-
-            this.addFilterNamed("strain");
-            this.addFilterNamed("N50");
-            this.addFilterNamed("Completeness");
-            this.addFilterNamed("Contamination");
+            if(this.state.fields.length===0){
+                this.addFilterNamed([
+                    "strain",
+                    "N50",
+                    "Completeness",
+                    "Contamination"
+                ]);
+            }
           })
           .catch((error) => {
             console.error(error);
           });
   }
 
-  addFilterNamed(column_id) {
-    var curfields = this.state.fields;
-    const newkey=this.nextkey++;
-    var current_fieldmeta = this.dict_fieldmeta[column_id];
-    curfields.push(
-                (<SearchField field={column_id} value={current_fieldmeta.v1} value2={current_fieldmeta.v2} key={newkey} id={newkey} fieldmeta={this.fieldmeta} searchform={this}/>)
-    );
-    this.setState({fields:curfields});
+  handleFieldDelete(id){
+    this.setState({
+      fields: this.state.fields.filter((e) => e.id !== id)
+    });
+  }
+
+  handleFieldChange(newfield){
+        this.setState({
+          fields: this.state.fields.map((e) => e.id===newfield.id ? newfield : e)
+        });
+  }
+
+  addFilterNamed(list_column_id) {
+    var newfields = list_column_id.map((column_id) => {
+        const newkey=this.nextkey++;
+        var current_fieldmeta = this.dict_fieldmeta[column_id];
+        return({
+          field:column_id,
+          value: current_fieldmeta.v1,
+          value2: current_fieldmeta.v2,
+          id: newkey
+        });
+    });
+
+    this.setState({fields: this.state.fields.concat(newfields)});
   }
 
 
   handleAddFilter() {
-    this.addFilterNamed("strain");
+    this.addFilterNamed(["strain"]);
   }
 
   handleSearch() {
-    var query=[];
-    for (const c of this.field_components) {
-      query.push(c.getQuery());
-    }
-    this.search_callback(query);
+    this.search_callback(this.state.fields);
   }
 
   render() {
+/*
+  console.log("render");
+  console.log(this.state.fields);*/
+
     return (
       <div>
         <div>
-          { this.state.fields }
+          {this.state.fields.map((field) => (
+            <SearchField
+                  field={field. field}
+                  value={field.value}
+                  value2={field.value2}
+                  key={field.id}
+                  id={field.id}
+                  handleDelete={this.handleFieldDelete}
+                  handleChange={this.handleFieldChange}
+                  fieldmeta={this.fieldmeta}
+            />
+          ))}
         </div>
         <button className="buttonspacer" onClick={this.handleAddFilter}>Add filter</button>
         <button className="buttonspacer" onClick={this.handleSearch}>Search</button>
@@ -176,8 +218,7 @@ class TheTable extends React.Component {
     super(props);
 
     this.state = {
-      straindata: null,
-      query: null
+      straindata: null
     };
 
     this.handleFastaAll = this.handleFastaAll.bind(this);
@@ -187,26 +228,33 @@ class TheTable extends React.Component {
     this.asynchUpdate = this.asynchUpdate.bind(this);
   }
 
-  asynchUpdate(query){
-/*
-console.log("update");
-console.log(this.state);
-*/
+  componentDidUpdate(prevProps, prevState) {
+    if(prevProps.query!==this.props.query){
+      this.asynchUpdate();
+    }
+  }
 
+  asynchUpdate(){
 
-    if(query!==null & this.state.straindata===null){
+    var query = this.props.query;
+      console.log("fetch "+JSON.stringify(query)+"--");
+
+//    if(query!==null & this.state.straindata===null){
       fetch('rest/straindata', {method: 'POST', headers: {'Content-Type': 'application/json'}, body:JSON.stringify(query)})
           .then((response) => response.json())
           .then((responseJson) => {
             this.setState({
-              straindata:responseJson
+              straindata: responseJson,
+              query: query
             })
           })
           .catch((error) => {
             console.error(error);
           });
-    }
+  //  }
   }
+
+
 
 
   handleFastaAll(){
@@ -220,24 +268,13 @@ console.log(this.state);
 
   render() {
 
-console.log("re");
-console.log(this.props);
-console.log(this.state);
-console.log("reeee");
-
     var straindata = this.state.straindata;
-
-
-    if(this.props.query!==this.state.query){
-      this.setState({query:this.props.query, straindata:null})
-      this.asynchUpdate(this.props.query);
-      return "Loading data...";
+    if(this.props.query==null){
+        return "Data will appear here after searching";
     }
-
     if(!straindata){
-       return "";
+       return "Loading data...";
     }
-
     if(straindata.length===0){
        return "No data to show"
     }
@@ -287,12 +324,14 @@ class App extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {straindata:null, query:null}
+    this.state = {
+        query:null
+    }
     this.handleSearch = this.handleSearch.bind(this);
   }
 
   handleSearch(q){
-    this.setState({query:q, straindata:null});
+    this.setState({query:q});
   }
 
   render() {
@@ -319,14 +358,13 @@ class App extends React.Component {
           Entries
         </div>
         <div className="divtable" id="divfortable">
-          <TheTable query={this.state.query} straindata={this.state.straindata}/>
+          <TheTable query={this.state.query} />
         </div>
       </div>
     );
   }
 }
 
-
-
+//straindata={this.state.straindata}
 
 export default App;
