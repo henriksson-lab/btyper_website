@@ -18,13 +18,6 @@ def column_desc():
     return f.to_json(orient="records")
     #return send_file('column_desc.csv')
 
-
-def formatOneConstraint(c):
-    #if c["type"]:
-    c.field
-
-#[{'field': 'strain', 'value': 'nostrain', 'value2': 0, 'id': 5}, {'field': 'strain', 'value': 'nostrain', 'value2': 0, 'id': 5}, {'field': 'N50', 'value': '20000', 'value2': 1000000, 'id': 6}, {'field': 'N50', 'value': '20000', 'value2': 1000000, 'id': 6}, {'field': 'Completeness', 'value': '95', 'value2': 100, 'id': 7}, {'field': 'Completeness', 'value': '95', 'value2': 100, 'id': 7}, {'field': 'Contamination', 'value': '0', 'value2': 5, 'id': 8}, {'field': 'Contamination', 'value': '0', 'value2': 5, 'id': 8}]
-
 @app.route("/straindata", methods=['GET', 'POST'])
 def gettable():
     content = request.json
@@ -37,8 +30,6 @@ def gettable():
       list_vars.append(c["value"])
 
     constraint = " AND ".join(list_constraint)
-#    if constraint=="":
-#      constraint="*"
 
     print(constraint)
     print(list_vars)
