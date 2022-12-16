@@ -310,7 +310,7 @@ class TheTable extends React.Component {
 
   handleFastaAll(){
       if(this.state.straindata!==null){
-          var listStrains = this.state.straindata.strain.values();
+          var listStrains = Object.values(this.state.straindata.strain);
           this.downloadFasta(listStrains);
       } else {
         console.log("not ready to download yet");
