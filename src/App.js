@@ -4,6 +4,11 @@ import './App.css';
 import React from 'react';
 import * as ReactDOM from 'react-dom/client';
 
+//import { streamSaver } from 'streamsaver'
+//const streamSaver = require('streamsaver')
+//const streamSaver = window.streamSaver
+
+
 /////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -62,8 +67,6 @@ class SearchField extends React.Component {
         id: this.props.id
     };
     var inputfield=[];
-
-//    this.handleChangeCB(this.state); //not the ideal place but works?
 
     var current_fieldmeta = this.dict_fieldmeta[state.field];
     if(current_fieldmeta.column_type==="text"){
@@ -218,7 +221,8 @@ class TheTable extends React.Component {
     super(props);
 
     this.state = {
-      straindata: null
+      straindata: null,
+      selected: []
     };
 
     this.handleFastaAll = this.handleFastaAll.bind(this);
@@ -226,7 +230,21 @@ class TheTable extends React.Component {
     this.handleStrainlistAll = this.handleStrainlistAll.bind(this);
     this.handleStrainlistSelected = this.handleStrainlistSelected.bind(this);
     this.asynchUpdate = this.asynchUpdate.bind(this);
+    this.handleChangeSelected = this.handleChangeSelected.bind(this);
   }
+
+  componentDidMount() {
+    // HACK: streamsaver references window which is undefined on SSR. Ensure library is only loaded on client
+    try {
+      this.streamSaver = require('streamsaver');
+      if (!this.streamSaver.WritableStream) {
+        this.streamSaver.WritableStream = require('web-streams-polyfill/ponyfill').WritableStream;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
 
   componentDidUpdate(prevProps, prevState) {
     if(prevProps.query!==this.props.query){
@@ -235,11 +253,8 @@ class TheTable extends React.Component {
   }
 
   asynchUpdate(){
-
     var query = this.props.query;
       console.log("fetch "+JSON.stringify(query)+"--");
-
-//    if(query!==null & this.state.straindata===null){
       fetch('rest/straindata', {method: 'POST', headers: {'Content-Type': 'application/json'}, body:JSON.stringify(query)})
           .then((response) => response.json())
           .then((responseJson) => {
@@ -251,20 +266,85 @@ class TheTable extends React.Component {
           .catch((error) => {
             console.error(error);
           });
-  //  }
   }
 
 
+
+  downloadFasta(listFasta){
+
+    const fileStream = this.streamSaver.createWriteStream('fasta.zip');
+
+    // from view-source:https://jimmywarting.github.io/StreamSaver.js/examples/fetch.html
+    var query={}
+    fetch(
+        'rest/getfasta',{
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(query)
+    }).then(res => {
+          const readableStream = res.body
+          if (window.WritableStream && readableStream.pipeTo) {
+            return readableStream.pipeTo(fileStream)
+              .then(() => console.log('done writing'))
+          }
+          window.writer = fileStream.getWriter()
+          const reader = res.body.getReader()
+          const pump = () => reader.read()
+            .then(res => res.done
+              ? window.writer.close()
+              : window.writer.write(res.value).then(pump))
+          pump()
+        /*
+        new Response('StreamSaver is awesome').body
+            .pipeTo(fileStream)
+            .then(() => {console.log("success");}, () => {console.log("err");})
+            */
+    })
+  }
 
 
   handleFastaAll(){
+      if(this.state.straindata!==null){
+        console.log(this.state.straindata);
+          var listStrains = this.state.straindata.strain;//map((e) => e.strain)
+          this.downloadFasta(listStrains);
+      } else {
+        console.log("not ready to download yet");
+      }
+    //window.location.href = "https://yoursite.com/src/assets/files/exampleDoc.pdf"
   }
+
+
   handleFastaSelected(){
+      var listStrains=this.state.selected;
+      if(listStrains.length==0){
+          alert("No strains selected");
+      } else {
+          this.downloadFasta(listStrains);
+      }
   }
+
+
   handleStrainlistAll(){
   }
+
+
   handleStrainlistSelected(){
   }
+
+
+  handleChangeSelected(event) {
+      const target = event.target;
+      var updatedList = [...this.state.selected];
+      if (event.target.checked) {
+            updatedList = [...this.state.selected, event.target.value];
+      } else {
+            updatedList.splice(this.state.selected.indexOf(event.target.value), 1);
+      }
+      this.setState({selected: updatedList});
+  }
+
+
 
   render() {
 
@@ -287,6 +367,7 @@ class TheTable extends React.Component {
 
     var fieldid=0;
 
+    var set_selected=this.state.selected
 
     return (
       <div>
@@ -304,8 +385,19 @@ class TheTable extends React.Component {
         <tbody>
           {row_nums.map(row_i =>
                 (<tr key={fieldid++}>
-                   <td key={fieldid++}><input type="checkbox" key={fieldid++}/></td>
-                   {colnames.map(cname => (<td key={fieldid++}>{straindata[cname][row_i]}</td>))}
+                   <td key={fieldid++}>
+                       <input
+                           type="checkbox" key={fieldid++}
+                           onChange={this.handleChangeSelected}
+                           checked={this.state.selected.includes(straindata["strain"][row_i])}
+                           value={straindata["strain"][row_i]}
+                       />
+                   </td>
+                   {colnames.map(cname => (
+                        <td key={fieldid++}>
+                            {straindata[cname][row_i]}
+                        </td>)
+                   )}
                  </tr>)
           )}
         </tbody>
@@ -333,6 +425,9 @@ class App extends React.Component {
   handleSearch(q){
     this.setState({query:q});
   }
+
+
+
 
   render() {
     return (

@@ -1,16 +1,25 @@
-from flask import Flask, render_template, send_from_directory, send_file, request
-#from flask_cors import CORS
-
+from flask import Flask, render_template, send_from_directory, send_file, request, Response
+import zipfly
 import pandas as pd
 import sqlite3 as sql
+import json
+from pathlib import Path
 
 
 app = Flask(__name__)
 #,static_folder='../build')
 #CORS(app)
 
+f = open("config.json","r")
+config = json.load(f)
+f.close()
+
+path_fna = Path(config["fnastore"])
 
 
+################################################################################################
+#
+################################################################################################
 @app.route("/column_desc")
 def column_desc():
     f = pd.read_csv("column_desc.csv2",sep="\t")
@@ -18,6 +27,11 @@ def column_desc():
     return f.to_json(orient="records")
     #return send_file('column_desc.csv')
 
+
+
+################################################################################################
+#
+################################################################################################
 @app.route("/straindata", methods=['GET', 'POST'])
 def gettable():
     content = request.json
@@ -56,14 +70,60 @@ def gettable():
       return "[]"
 
 
+################################################################################################
+#
+################################################################################################
+@app.route("/getfasta", methods=['GET', 'POST'])
+def getfasta():
+    #print(config["fnastore"])
+    #content = request.json
+    paths = []
+    print(request.json)
+
+    list_fasta = request.json
+    for id in list_fasta:
+        # TODO clean up id content
+        fs = path_fna / (id+".fna")
+        print(fs)
+        if fs.exists():
+            paths.append({
+                'fs': str(fs),
+                'n': id+".fna"
+            })
+        else:
+            print("Failed to find FNA file "+id+"  "+fs)
+
+        """
+    paths = [
+        {
+            'fs': '/home/mahogny/webdev/btyper/fna/SRR9720064.fna',
+            'n': 'SRR9720064.fna',
+        },
+        {
+            'fs': '/home/mahogny/webdev/btyper/fna/SRR9720146.fna',
+            'n': 'SRR9720146.fna',
+        },
+    ]
+        """
+
+    zfly = zipfly.ZipFly(paths=paths)
+    z = zfly.generator()
+
+    response = Response(z, mimetype='application/zip', )
+    response.headers['Content-Disposition'] = 'attachment; filename=file.zip'
+    return response
 
 
+
+################################################################################################
+# Not used
+################################################################################################
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def index(path):
   '''Return index.html for all non-api routes'''
   #pylint: disable=unused-argument
-  return send_from_directory(app.static_folder, 'index.html')
+  return "" #send_from_directory(app.static_folder, 'index.html')
 
 
 
