@@ -183,10 +183,6 @@ class SearchForm extends React.Component {
   }
 
   render() {
-/*
-  console.log("render");
-  console.log(this.state.fields);*/
-
     return (
       <div>
         <div>
@@ -254,7 +250,6 @@ class TheTable extends React.Component {
 
   asynchUpdate(){
     var query = this.props.query;
-      console.log("fetch "+JSON.stringify(query)+"--");
       fetch('rest/straindata', {method: 'POST', headers: {'Content-Type': 'application/json'}, body:JSON.stringify(query)})
           .then((response) => response.json())
           .then((responseJson) => {
@@ -271,9 +266,7 @@ class TheTable extends React.Component {
 
 
   downloadFasta(listFasta){
-
     const fileStream = this.streamSaver.createWriteStream('fasta.zip');
-
     // from view-source:https://jimmywarting.github.io/StreamSaver.js/examples/fetch.html
     var query={}
     fetch(
@@ -294,26 +287,35 @@ class TheTable extends React.Component {
               ? window.writer.close()
               : window.writer.write(res.value).then(pump))
           pump()
-        /*
-        new Response('StreamSaver is awesome').body
-            .pipeTo(fileStream)
-            .then(() => {console.log("success");}, () => {console.log("err");})
-            */
     })
   }
 
+  downloadIdList(listFasta){
+    // from view-source:https://jimmywarting.github.io/StreamSaver.js/examples/fetch.html
+    const fileStream = this.streamSaver.createWriteStream('listid.txt');
+    const inp=listFasta.join("\n");
+    const readableStream = new Response(inp).body;
+    if (window.WritableStream && readableStream.pipeTo) {
+    return readableStream.pipeTo(fileStream)
+      .then(() => console.log('done writing'))
+    }
+    window.writer = fileStream.getWriter()
+    const reader = new Response(inp).body.getReader()
+    const pump = () => reader.read()
+    .then(res => res.done
+      ? window.writer.close()
+      : window.writer.write(res.value).then(pump))
+    pump()
+  }
 
   handleFastaAll(){
       if(this.state.straindata!==null){
-        console.log(this.state.straindata);
-          var listStrains = this.state.straindata.strain;//map((e) => e.strain)
+          var listStrains = this.state.straindata.strain.values();
           this.downloadFasta(listStrains);
       } else {
         console.log("not ready to download yet");
       }
-    //window.location.href = "https://yoursite.com/src/assets/files/exampleDoc.pdf"
   }
-
 
   handleFastaSelected(){
       var listStrains=this.state.selected;
@@ -326,10 +328,22 @@ class TheTable extends React.Component {
 
 
   handleStrainlistAll(){
+      if(this.state.straindata!==null){
+          var listStrains = Object.values(this.state.straindata.strain);
+          this.downloadIdList(listStrains);
+      } else {
+        console.log("not ready to download yet");
+      }
   }
 
 
   handleStrainlistSelected(){
+      var listStrains=this.state.selected;
+      if(listStrains.length==0){
+          alert("No strains selected");
+      } else {
+          this.downloadIdList(listStrains);
+      }
   }
 
 

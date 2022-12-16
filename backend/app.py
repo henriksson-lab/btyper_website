@@ -75,9 +75,8 @@ def gettable():
 ################################################################################################
 @app.route("/getfasta", methods=['GET', 'POST'])
 def getfasta():
-    #print(config["fnastore"])
-    #content = request.json
     paths = []
+    print("download")
     print(request.json)
 
     list_fasta = request.json
@@ -92,19 +91,6 @@ def getfasta():
             })
         else:
             print("Failed to find FNA file "+id+"  "+fs)
-
-        """
-    paths = [
-        {
-            'fs': '/home/mahogny/webdev/btyper/fna/SRR9720064.fna',
-            'n': 'SRR9720064.fna',
-        },
-        {
-            'fs': '/home/mahogny/webdev/btyper/fna/SRR9720146.fna',
-            'n': 'SRR9720146.fna',
-        },
-    ]
-        """
 
     zfly = zipfly.ZipFly(paths=paths)
     z = zfly.generator()
