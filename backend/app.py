@@ -8,9 +8,8 @@ from pathlib import Path
 
 app = Flask(__name__)
 #,static_folder='../build')
-#CORS(app)
 
-f = open("config.json","r")
+f = open("config.json", "r")
 config = json.load(f)
 f.close()
 
@@ -23,11 +22,15 @@ path_fna = Path(config["fnastore"])
 @app.route("/column_desc")
 def column_desc():
     f = pd.read_csv("column_desc.csv2",sep="\t")
+    f = f.fillna("")
     #print(f.to_json(orient="records"))
     return f.to_json(orient="records")
     #return send_file('column_desc.csv')
 
 
+def cleanfieldname(s):
+    return ''.join(c for c in s if c.isalpha() or c.isnumeric() or c=="(" or c==")")
+        #''.join(filter(str.isalpha, s))
 
 ################################################################################################
 #
@@ -39,12 +42,31 @@ def gettable():
     list_constraint=[]
     list_vars=[]
     for c in content:
-      list_constraint.append("? = ?")
-      list_vars.append(c["field"])
-      list_vars.append(c["value"])
+        if c["column_type"]=="text":
+            list_constraint.append(
+                "\""+cleanfieldname(c["field"])+"\" = ?")
+            list_vars.append(c["value"])
+        elif c["column_type"]=="number":
+            list_constraint.append(
+                "\""+cleanfieldname(c["field"])+"\""+
+                " > ? and "+
+                "\""+cleanfieldname(c["field"])+"\""+
+                " < ?")
+            list_vars.append(float(c["value"]))
+            list_vars.append(float(c["value2"]))
+            """
+            list_constraint.append("? > ? and ? < ?")
+            list_vars.append(c["field"])
+            list_vars.append(float(c["value"]))
+            list_vars.append(c["field"])
+            list_vars.append(float(c["value2"]))
+            """
+        else:
+            print("Got bad column type "+c["column_type"])
 
     constraint = " AND ".join(list_constraint)
 
+    print("search")
     print(constraint)
     print(list_vars)
 
@@ -53,8 +75,7 @@ def gettable():
     if constraint=="":
       cursor.execute("SELECT * from straindata limit 100")
     else:
-      cursor.execute("SELECT * from straindata where "+constraint+" limit 100", list_vars)
-#    df = pd.read_sql_query("SELECT "+constraint+" from straindata limit 100", conn, paramrs)
+      cursor.execute("SELECT * from straindata where "+constraint, list_vars)
     df=pd.DataFrame(cursor.fetchall())
 
     conn.close()

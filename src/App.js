@@ -2,7 +2,7 @@
 import './App.css';
 
 import React from 'react';
-import * as ReactDOM from 'react-dom/client';
+//import * as ReactDOM from 'react-dom/client';
 
 //import { streamSaver } from 'streamsaver'
 //const streamSaver = require('streamsaver')
@@ -42,6 +42,7 @@ class SearchField extends React.Component {
         field: this.props.field,
         value: this.props.value,
         value2: this.props.value2,
+        column_type: this.props.column_type,
         id: this.props.id
     };
     if(target.name==="selectfield"){
@@ -49,11 +50,16 @@ class SearchField extends React.Component {
       var fieldmeta = this.dict_fieldmeta[state.field];
       state.value = fieldmeta.v1;
       state.value2 = fieldmeta.v2;
+      state.column_type = fieldmeta.column_type;
     } else if(target.name==="value"){
       state.value = event.target.value;
     } else if(target.name==="value2"){
       state.value2 = event.target.value
     }
+
+    console.log("new");
+    console.log(state);
+    console.log(this.dict_fieldmeta);
     this.handleChangeCB(state);
   }
 
@@ -75,7 +81,7 @@ class SearchField extends React.Component {
       </label>));
     } else if(current_fieldmeta.column_type==="number"){
       inputfield.push((<label>
-        {'\u00A0'} From: <input type="text" value={state.value} onChange={this.handleChange} name="value"/>
+        {'\u00A0'} From: <input type="text" value={state.value}  onChange={this.handleChange} name="value"/>
         {'\u00A0'} To:   <input type="text" value={state.value2} onChange={this.handleChange} name="value2"/>
       </label>));
     }
@@ -86,7 +92,7 @@ class SearchField extends React.Component {
           <select value={state.field} onChange={this.handleChange} name="selectfield">
                 {
                     this.fieldmeta.map((item, index) => (
-                        <option value={item.column_id} key={state.id+"--"+index }>{item.column_id}</option>
+                        <option value={item.column_id} key={state.id+"--"+index}>{item.column_id}</option>
                     ))
                 }
           </select>
@@ -119,10 +125,8 @@ class SearchForm extends React.Component {
     this.handleAddFilter = this.handleAddFilter.bind(this);
     this.addFilterNamed = this.addFilterNamed.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
-
     this.handleFieldChange = this.handleFieldChange.bind(this);
     this.handleFieldDelete = this.handleFieldDelete.bind(this);
-
   }
 
   componentDidMount() {
@@ -163,9 +167,10 @@ class SearchForm extends React.Component {
         const newkey=this.nextkey++;
         var current_fieldmeta = this.dict_fieldmeta[column_id];
         return({
-          field:column_id,
+          field: column_id,
           value: current_fieldmeta.v1,
           value2: current_fieldmeta.v2,
+          column_type: current_fieldmeta.column_type,
           id: newkey
         });
     });
@@ -179,6 +184,7 @@ class SearchForm extends React.Component {
   }
 
   handleSearch() {
+  console.log(this.state.fields);
     this.search_callback(this.state.fields);
   }
 
@@ -188,7 +194,7 @@ class SearchForm extends React.Component {
         <div>
           {this.state.fields.map((field) => (
             <SearchField
-                  field={field. field}
+                  field={field.field}
                   value={field.value}
                   value2={field.value2}
                   key={field.id}
@@ -319,7 +325,7 @@ class TheTable extends React.Component {
 
   handleFastaSelected(){
       var listStrains=this.state.selected;
-      if(listStrains.length==0){
+      if(listStrains.length===0){
           alert("No strains selected");
       } else {
           this.downloadFasta(listStrains);
@@ -339,7 +345,7 @@ class TheTable extends React.Component {
 
   handleStrainlistSelected(){
       var listStrains=this.state.selected;
-      if(listStrains.length==0){
+      if(listStrains.length===0){
           alert("No strains selected");
       } else {
           this.downloadIdList(listStrains);
@@ -348,7 +354,6 @@ class TheTable extends React.Component {
 
 
   handleChangeSelected(event) {
-      const target = event.target;
       var updatedList = [...this.state.selected];
       if (event.target.checked) {
             updatedList = [...this.state.selected, event.target.value];
@@ -361,7 +366,6 @@ class TheTable extends React.Component {
 
 
   render() {
-
     var straindata = this.state.straindata;
     if(this.props.query==null){
         return "Data will appear here after searching";
@@ -380,8 +384,6 @@ class TheTable extends React.Component {
     var row_nums = Array.from(Array(num_rows).keys())
 
     var fieldid=0;
-
-    var set_selected=this.state.selected
 
     return (
       <div>
