@@ -29,8 +29,7 @@ def column_desc():
 
 
 def cleanfieldname(s):
-    return ''.join(c for c in s if c.isalpha() or c.isnumeric() or c=="(" or c==")")
-        #''.join(filter(str.isalpha, s))
+    return ''.join(c for c in s if c.isalpha() or c.isnumeric() or c=="(" or c==")" or c=="_" or c=="[" or c=="]" or c==" ")
 
 ################################################################################################
 #
