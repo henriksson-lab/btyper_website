@@ -227,7 +227,8 @@ class TheTable extends React.Component {
     super(props);
 
     this.state = {
-      straindata: null,
+      //query: props.query,
+      //straindata: props.straindata,
       selected: []
     };
 
@@ -235,7 +236,6 @@ class TheTable extends React.Component {
     this.handleFastaSelected = this.handleFastaSelected.bind(this);
     this.handleStrainlistAll = this.handleStrainlistAll.bind(this);
     this.handleStrainlistSelected = this.handleStrainlistSelected.bind(this);
-    this.asynchUpdate = this.asynchUpdate.bind(this);
     this.handleChangeSelected = this.handleChangeSelected.bind(this);
   }
 
@@ -252,26 +252,6 @@ class TheTable extends React.Component {
   }
 
 
-  componentDidUpdate(prevProps, prevState) {
-    if(prevProps.query!==this.props.query){
-      this.asynchUpdate();
-    }
-  }
-
-  asynchUpdate(){
-    var query = this.props.query;
-      fetch('rest/straindata', {method: 'POST', headers: {'Content-Type': 'application/json'}, body:JSON.stringify(query)})
-          .then((response) => response.json())
-          .then((responseJson) => {
-            this.setState({
-              straindata: responseJson,
-              query: query
-            })
-          })
-          .catch((error) => {
-            console.error(error);
-          });
-  }
 
 
 
@@ -370,7 +350,7 @@ class TheTable extends React.Component {
 
 
   render() {
-    var straindata = this.state.straindata;
+    var straindata = this.props.straindata;
     if(this.props.query==null){
         return "Data will appear here after searching";
     }
@@ -502,6 +482,31 @@ class TheMap extends React.Component {
       ]
     };
 
+
+
+    var forindex="GTDB_Species";
+
+    var pie_data = [];
+    var values = this.props.straindata;
+    if(values!==null && forindex in values){
+        let uniqueItems = [...new Set(Object.values(values[forindex]))]
+        var countItem={};
+        for (const e of uniqueItems) {
+            countItem[e]=0;
+        }
+        for (const e of Object.values(values[forindex])) {
+            countItem[e]=countItem[e]+1;
+        }
+        for (const [key, value] of Object.entries(countItem)) {
+            pie_data.push({
+              name: key,
+              y: value//,
+              //sliced: true
+            });
+        }
+    }
+
+
     const pieOptions = {
       chart: {
         type: "pie"
@@ -538,16 +543,7 @@ class TheMap extends React.Component {
               }
             }
           },
-          data: [
-            {
-              y: 100,
-              sliced: true
-            },
-            {
-              y: 33,
-              sliced: true
-            }
-          ]
+          data: pie_data
         }
       ]
     };
@@ -581,16 +577,39 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-        query:null
+        query:null,
+        straindata:null
     }
     this.handleSearch = this.handleSearch.bind(this);
+    this.asynchUpdate = this.asynchUpdate.bind(this);
   }
 
   handleSearch(q){
-    this.setState({query:q});
+    //this.setState({query:q, straindata:null});
+    this.asynchUpdate(q);
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    if(prevProps.query!==this.props.query){
+      //this.asynchUpdate();
+    }
+  }
 
+  asynchUpdate(query){
+      //var query = this.props.query;
+      fetch('rest/straindata', {method: 'POST', headers: {'Content-Type': 'application/json'}, body:JSON.stringify(query)})
+          .then((response) => response.json())
+          .then((responseJson) => {
+            console.log("got new data");
+            this.setState({
+              query: query,
+              straindata: responseJson
+            });
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+  }
 
 
   render() {
@@ -611,13 +630,13 @@ class App extends React.Component {
           Strains across the world
         </div>
         <div className="withspacer">
-            <TheMap/>
+            <TheMap query={this.state.query} straindata={this.state.straindata} />
         </div>
         <div className="App-divider">
           Entries
         </div>
         <div className="divtable" id="divfortable">
-          <TheTable query={this.state.query} />
+          <TheTable query={this.state.query} straindata={this.state.straindata} />
         </div>
       </div>
     );
