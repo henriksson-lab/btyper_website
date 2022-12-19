@@ -23,9 +23,7 @@ path_fna = Path(config["fnastore"])
 def column_desc():
     f = pd.read_csv("column_desc.csv2",sep="\t")
     f = f.fillna("")
-    #print(f.to_json(orient="records"))
     return f.to_json(orient="records")
-    #return send_file('column_desc.csv')
 
 
 def cleanfieldname(s):
@@ -53,13 +51,6 @@ def gettable():
                 " < ?")
             list_vars.append(float(c["value"]))
             list_vars.append(float(c["value2"]))
-            """
-            list_constraint.append("? > ? and ? < ?")
-            list_vars.append(c["field"])
-            list_vars.append(float(c["value"]))
-            list_vars.append(c["field"])
-            list_vars.append(float(c["value2"]))
-            """
         else:
             print("Got bad column type "+c["column_type"])
 
