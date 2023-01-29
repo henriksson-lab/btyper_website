@@ -142,7 +142,7 @@ class SearchForm extends React.Component {
 
             if(this.state.fields.length===0){
                 this.addFilterNamed([
-                    "strain",
+                    "BTyperDB_ID",
                     "N50",
                     "Completeness",
                     "Contamination"
@@ -184,7 +184,7 @@ class SearchForm extends React.Component {
 
 
   handleAddFilter() {
-    this.addFilterNamed(["strain"]);
+    this.addFilterNamed(["BTyperDB_ID"]);
   }
 
   handleSearch() {
@@ -364,7 +364,7 @@ class TheTable extends React.Component {
     var colnames=Object.keys(straindata);
 
 //    var num_rows = straindata["column_id"].length;
-    var num_rows = Object.keys(straindata["strain"]).length;  //ugly. should not have row indices on each entry
+    var num_rows = Object.keys(straindata["BTyperDB_ID"]).length;  //ugly. should not have row indices on each entry
     var row_nums = Array.from(Array(num_rows).keys())
 
     var fieldid=0;
@@ -389,8 +389,8 @@ class TheTable extends React.Component {
                        <input
                            type="checkbox" key={fieldid++}
                            onChange={this.handleChangeSelected}
-                           checked={this.state.selected.includes(straindata["strain"][row_i])}
-                           value={straindata["strain"][row_i]}
+                           checked={this.state.selected.includes(straindata["BTyperDB_ID"][row_i])}
+                           value={straindata["BTyperDB_ID"][row_i]}
                        />
                    </td>
                    {colnames.map(cname => (
@@ -414,56 +414,329 @@ class TheTable extends React.Component {
 /////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+var dict_country2code={
+
+"Afghanistan": "af",
+"Albania": "al",
+"Algeria": "dz",
+"American Samoa": "as",
+"Andorra": "ad",
+"Angola": "ao",
+"Anguilla": "ai",
+"Antarctica": "aq",
+"Antigua and Barbuda": "ag",
+"Argentina": "ar",
+"Armenia": "am",
+"Aruba": "aw",
+"Australia": "au",
+"Austria": "at",
+"Azerbaijan": "az",
+"Bahamas (the)": "bs",
+"Bahrain": "bh",
+"Bangladesh": "bd",
+"Barbados": "bb",
+"Belarus": "by",
+"Belgium": "be",
+"Belize": "bz",
+"Benin": "bj",
+"Bermuda": "bm",
+"Bhutan": "bt",
+"Bolivia": "bo",
+"Bonaire, Sint Eustatius and Saba": "bq",
+"Bosnia and Herzegovina": "ba",
+"Botswana": "bw",
+"Bouvet Island": "bv",
+"Brazil": "br",
+"British Indian Ocean Territory (the)": "io",
+"Brunei Darussalam": "bn",
+"Bulgaria": "bg",
+"Burkina Faso": "bf",
+"Burundi": "bi",
+"Cabo Verde": "cv",
+"Cambodia": "kh",
+"Cameroon": "cm",
+"Canada": "ca",
+"Cayman Islands (the)": "ky",
+"Central African Republic (the)": "cf",
+"Chad": "td",
+"Chile": "cl",
+"China": "cn",
+"Christmas Island": "cx",
+"Cocos (Keeling) Islands (the)": "cc",
+"Colombia": "co",
+"Comoros (the)": "km",
+"Congo (the Democratic Republic of the)": "cd",
+"Congo (the)": "cg",
+"Cook Islands (the)": "ck",
+"Costa Rica": "cr",
+"Croatia": "hr",
+"Cuba": "cu",
+"Curaçao": "cw",
+"Cyprus": "cy",
+"Czechia": "cz",
+"Côte d'Ivoire": "ci",
+"Denmark": "dk",
+"Djibouti": "dj",
+"Dominica": "dm",
+"Dominican Republic (the)": "do",
+"Ecuador": "ec",
+"Egypt": "eg",
+"El Salvador": "sv",
+"Equatorial Guinea": "gq",
+"Eritrea": "er",
+"Estonia": "ee",
+"Eswatini": "sz",
+"Ethiopia": "et",
+"Falkland Islands (the) [Malvinas]": "fk",
+"Faroe Islands (the)": "fo",
+"Fiji": "fj",
+"Finland": "fi",
+"France": "fr",
+"French Guiana": "gf",
+"French Polynesia": "pf",
+"French Southern Territories (the)": "tf",
+"Gabon": "ga",
+"Gambia (the)": "gm",
+"Georgia": "ge",
+"Germany": "de",
+"Ghana": "gh",
+"Gibraltar": "gi",
+"Greece": "gr",
+"Greenland": "gl",
+"Grenada": "gd",
+"Guadeloupe": "gp",
+"Guam": "gu",
+"Guatemala": "gt",
+"Guernsey": "gg",
+"Guinea": "gn",
+"Guinea-Bissau": "gw",
+"Guyana": "gy",
+"Haiti": "ht",
+"Heard Island and McDonald Islands": "hm",
+"Holy See (the)": "va",
+"Honduras": "hn",
+"Hong Kong": "hk",
+"Hungary": "hu",
+"Iceland": "is",
+"India": "in",
+"Indonesia": "id",
+"Iran": "ir",
+"Iraq": "iq",
+"Ireland": "ie",
+"Isle of Man": "im",
+"Israel": "il",
+"Italy": "it",
+"Jamaica": "jm",
+"Japan": "jp",
+"Jersey": "je",
+"Jordan": "jo",
+"Kazakhstan": "kz",
+"Kenya": "ke",
+"Kiribati": "ki",
+"Korea (the Democratic People's Republic of)": "kp",
+"South Korea": "kr",
+"Kuwait": "kw",
+"Kyrgyzstan": "kg",
+"Lao People's Democratic Republic (the)": "la",
+"Latvia": "lv",
+"Lebanon": "lb",
+"Lesotho": "ls",
+"Liberia": "lr",
+"Libya": "ly",
+"Liechtenstein": "li",
+"Lithuania": "lt",
+"Luxembourg": "lu",
+"Macao": "mo",
+"Madagascar": "mg",
+"Malawi": "mw",
+"Malaysia": "my",
+"Maldives": "mv",
+"Mali": "ml",
+"Malta": "mt",
+"Marshall Islands (the)": "mh",
+"Martinique": "mq",
+"Mauritania": "mr",
+"Mauritius": "mu",
+"Mayotte": "yt",
+"Mexico": "mx",
+"Micronesia (Federated States of)": "fm",
+"Moldova (the Republic of)": "md",
+"Monaco": "mc",
+"Mongolia": "mn",
+"Montenegro": "me",
+"Montserrat": "ms",
+"Morocco": "ma",
+"Mozambique": "mz",
+"Myanmar": "mm",
+"Namibia": "na",
+"Nauru": "nr",
+"Nepal": "np",
+"Netherlands": "nl",
+"New Caledonia": "nc",
+"New Zealand": "nz",
+"Nicaragua": "ni",
+"Niger (the)": "ne",
+"Nigeria": "ng",
+"Niue": "nu",
+"Norfolk Island": "nf",
+"Northern Mariana Islands (the)": "mp",
+"Norway": "no",
+"Oman": "om",
+"Pakistan": "pk",
+"Palau": "pw",
+"Palestine, State of": "ps",
+"Panama": "pa",
+"Papua New Guinea": "pg",
+"Paraguay": "py",
+"Peru": "pe",
+"Philippines (the)": "ph",
+"Pitcairn": "pn",
+"Poland": "pl",
+"Portugal": "pt",
+"Puerto Rico": "pr",
+"Qatar": "qa",
+"Republic of North Macedonia": "mk",
+"Romania": "ro",
+"Russian Federation": "ru",
+"Rwanda": "rw",
+"Réunion": "re",
+"Saint Barthélemy": "bl",
+"Saint Helena, Ascension and Tristan da Cunha": "sh",
+"Saint Kitts and Nevis": "kn",
+"Saint Lucia": "lc",
+"Saint Martin (French part)": "mf",
+"Saint Pierre and Miquelon": "pm",
+"Saint Vincent and the Grenadines": "vc",
+"Samoa": "ws",
+"San Marino": "sm",
+"Sao Tome and Principe": "st",
+"Saudi Arabia": "sa",
+"Senegal": "sn",
+"Serbia": "rs",
+"Seychelles": "sc",
+"Sierra Leone": "sl",
+"Singapore": "sg",
+"Sint Maarten (Dutch part)": "sx",
+"Slovakia": "sk",
+"Slovenia": "si",
+"Solomon Islands": "sb",
+"Somalia": "so",
+"South Africa": "za",
+"South Georgia and the South Sandwich Islands": "gs",
+"South Sudan": "ss",
+"Spain": "es",
+"Sri Lanka": "lk",
+"Sudan (the)": "sd",
+"Suriname": "sr",
+"Svalbard and Jan Mayen": "sj",
+"Sweden": "se",
+"Switzerland": "ch",
+"Syrian Arab Republic": "sy",
+"Taiwan": "tw",
+"Tajikistan": "tj",
+"Tanzania": "tz",
+"Thailand": "th",
+"Timor-Leste": "tl",
+"Togo": "tg",
+"Tokelau": "tk",
+"Tonga": "to",
+"Trinidad and Tobago": "tt",
+"Tunisia": "tn",
+"Turkey": "tr",
+"Turkmenistan": "tm",
+"Turks and Caicos Islands (the)": "tc",
+"Tuvalu": "tv",
+"Uganda": "ug",
+"Ukraine": "ua",
+"United Arab Emirates (the)": "ae",
+"United Kingdom": "gb",
+"United States Minor Outlying Islands (the)": "um",
+"United States": "us",
+"Uruguay": "uy",
+"Uzbekistan": "uz",
+"Vanuatu": "vu",
+"Venezuela (Bolivarian Republic of)": "ve",
+"Vietnam": "vn",
+"Virgin Islands (British)": "vg",
+"Virgin Islands (U.S.)": "vi",
+"Wallis and Futuna": "wf",
+"Western Sahara": "eh",
+"Yemen": "ye",
+"Zambia": "zm",
+"Zimbabwe": "zw",
+"Åland Islands": "ax",
+
+//added extra entries
+"Czechoslovakia (Historic)": "cz",
+"Iran, Islamic Republic of": "ir",
+
+//// Edited entries. these are original
+"Russian Federation (the)": "ru",
+"Iran (Islamic Republic of)": "ir",
+"Tanzania, United Republic of": "tz",
+"United States of America (the)": "us",
+"United Kingdom of Great Britain and Northern Ireland (the)": "gb",
+"Korea (the Republic of)": "kr",
+"Netherlands (the)": "nl",
+"Taiwan (Province of China)": "tw",
+"Bolivia (Plurinational State of)": "bo",
+"Viet Nam": "vn"
+};
+
+
 class TheMap extends React.Component {
   constructor(props) {
     super(props);
 
-    this.data = [
-            ['gl', 10], ['sh', 11], ['bu', 12], ['lk', 13], ['as', 14], ['dk', 15],
-        ['fo', 16], ['gu', 17], ['mp', 18], ['pr', 19], ['um', 20], ['us', 21],
-        ['vi', 22], ['ca', 23], ['st', 24], ['jp', 25], ['cv', 26], ['dm', 27],
-        ['sc', 28], ['jm', 29], ['ws', 30], ['om', 31], ['vc', 32], ['sb', 33],
-        ['lc', 34], ['fr', 35], ['nr', 36], ['no', 37], ['fm', 38], ['kn', 39],
-        ['cn', 40], ['bh', 41], ['to', 42], ['id', 43], ['mu', 44], ['tt', 45],
-        ['sw', 46], ['bs', 47], ['pw', 48], ['tv', 49], ['mh', 50], ['cl', 51],
-        ['ki', 52], ['ph', 53], ['th', 54], ['gd', 55], ['ag', 56], ['es', 57],
-        ['bb', 58], ['it', 59], ['mt', 60], ['mv', 61], ['sp', 62], ['pg', 63],
-        ['sg', 64], ['cnm', 65], ['gb', 66], ['cy', 67], ['gr', 68], ['km', 69],
-        ['fj', 70], ['ru', 71], ['va', 72], ['sm', 73], ['az', 74], ['ls', 75],
-        ['tj', 76], ['ml', 77], ['dz', 78], ['tw', 79], ['kz', 80], ['kg', 81],
-        ['uz', 82], ['tz', 83], ['ar', 84], ['sa', 85], ['nl', 86], ['ye', 87],
-        ['ae', 88], ['in', 89], ['tr', 90], ['bd', 91], ['ch', 92], ['sr', 93],
-        ['pt', 94], ['my', 95], ['kh', 96], ['vn', 97], ['br', 98], ['pa', 99],
-        ['ng', 100], ['ir', 101], ['ht', 102], ['do', 103], ['sl', 104],
-        ['gw', 105], ['ba', 106], ['hr', 107], ['ee', 108], ['mx', 109],
-        ['tn', 110], ['kw', 111], ['de', 112], ['mm', 113], ['gq', 114],
-        ['ga', 115], ['ie', 116], ['pl', 117], ['lt', 118], ['eg', 119],
-        ['ug', 120], ['cd', 121], ['am', 122], ['mk', 123], ['al', 124],
-        ['cm', 125], ['bj', 126], ['nc', 127], ['ge', 128], ['tl', 129],
-        ['tm', 130], ['pe', 131], ['mw', 132], ['mn', 133], ['ao', 134],
-        ['mz', 135], ['za', 136], ['cr', 137], ['sv', 138], ['bz', 139],
-        ['co', 140], ['ec', 141], ['ly', 142], ['sd', 143], ['kp', 144],
-        ['kr', 145], ['gy', 146], ['hn', 147], ['ni', 148], ['et', 149],
-        ['so', 150], ['gh', 151], ['si', 152], ['gt', 153], ['jo', 154],
-        ['we', 155], ['il', 156], ['zm', 157], ['mc', 158], ['uy', 159],
-        ['rw', 160], ['bo', 161], ['cg', 162], ['eh', 163], ['rs', 164],
-        ['me', 165], ['tg', 166], ['la', 167], ['af', 168], ['jk', 169],
-        ['pk', 170], ['bg', 171], ['ua', 172], ['ro', 173], ['qa', 174],
-        ['li', 175], ['at', 176], ['sz', 177], ['hu', 178], ['ne', 179],
-        ['lu', 180], ['ad', 181], ['ci', 182], ['lr', 183], ['bn', 184],
-        ['mr', 185], ['be', 186], ['iq', 187], ['gm', 188], ['ma', 189],
-        ['td', 190], ['kv', 191], ['lb', 192], ['sx', 193], ['dj', 194],
-        ['er', 195], ['bi', 196], ['sn', 197], ['gn', 198], ['zw', 199],
-        ['py', 200], ['by', 201], ['lv', 202], ['sy', 203], ['na', 204],
-        ['bf', 205], ['ss', 206], ['cf', 207], ['md', 208], ['gz', 209],
-        ['ke', 210], ['cz', 211], ['sk', 212], ['vu', 213], ['nz', 214],
-        ['cu', 215], ['fi', 216], ['se', 217], ['au', 218], ['mg', 219],
-        ['ve', 220], ['is', 221], ['bw', 222], ['bt', 223], ['np', 224],
-    ];
+    this.data=[];
   }
 
 
   render() {
+
+    this.data=[];
+
+    //Collect counts
+    var straindata = this.props.straindata;
+    if(straindata != null){
+
+    var list_country = Object.values(straindata["Country"]);
+
+    //check which are not in list
+    var list_undef_country = list_country.map((e) => (e in dict_country2code) ? "":e );
+    //Count for each country
+    const counts2 = {};
+    for (const num of list_undef_country) {
+        counts2[num] = counts2[num] ? counts2[num] + 1 : 1;
+    }
+    console.log(999);
+    console.log(counts2);
+
+//for some reason both "" and null in this list
+
+    //Map country to 2-char code. Some will be mapped to undefined likely, and thus merged
+    list_country = list_country.map((e) => dict_country2code[e] );
+
+    //Count for each country
+    const counts = {};
+    for (const num of list_country) {
+        counts[num] = counts[num] ? counts[num] + 1 : 1;
+    }
+
+    //Format of data is: [[country,count],[country,count]]
+    var arr = [];
+    for (var key in counts) {
+        if (counts.hasOwnProperty(key)) {
+            arr.push( [ key, counts[key] ] );
+        }
+    }
+    this.data = arr;
+    }
+
+    //More map options
     const mapOptions = {
       title: {
         text: ''
