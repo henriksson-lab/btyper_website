@@ -729,9 +729,16 @@ class TheMap extends React.Component {
         text: ''
       },
       colorAxis: {
-        min: 0,
-        stops: [[0.4, '#ffff00'], [0.65, '#bfff00'], [1, '	#40ff00']]
-      },
+                min: 1,
+                type: 'logarithmic',
+                minColor: '#EEEEFF',
+                maxColor: '#000022',
+                stops: [
+                    [0, '#EFEFFF'],
+                    [0.67, '#4444FF'],
+                    [1, '#000022']
+                ]
+            },
 
       series: [
         {
