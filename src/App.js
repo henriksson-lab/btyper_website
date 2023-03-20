@@ -703,7 +703,7 @@ class TheMap extends React.Component {
     var straindata = this.props.straindata;
     if(straindata != null){
 
-    var list_country = Object.values(straindata["Country"]);
+    var list_country = Object.values(straindata["Country_Code"]);
 
     //check which are not in list
     var list_undef_country = list_country.map((e) => (e in dict_country2code) ? "":e );
