@@ -1,7 +1,7 @@
 import sqlite3 as sql
 import pandas as pd
 
-f = pd.read_csv("final_table_v3_LCgeoyear.tsv",sep="\t")
+f = pd.read_csv("final_table_v4_LCgeoyearFixed.tsv",sep="\t")
 
 #Describe columns
 coldesc = pd.read_csv("column_desc.csv",sep="\t")

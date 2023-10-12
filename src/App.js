@@ -72,6 +72,7 @@ class SearchField extends React.Component {
   render() {
     var state = {
         field: this.props.field,
+        column_type: this.props.column_type,
         value: this.props.value,
         value2: this.props.value2,
         id: this.props.id
@@ -201,6 +202,7 @@ class SearchForm extends React.Component {
                   field={field.field}
                   value={field.value}
                   value2={field.value2}
+                  column_type={field.column_type}
                   key={field.id}
                   id={field.id}
                   handleDelete={this.handleFieldDelete}
