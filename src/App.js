@@ -2,7 +2,9 @@
 import './App.css';
 
 import React from 'react';
-
+import {ReactComponent as BTyperDBLogo} from './images/Btyperdb_logo.svg';
+import {ReactComponent as BTyperDBIcon} from './images/BTyperdb_icon.svg';
+import carrolllabicon from './images/carrolllab_icon.png';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import PieChart from "highcharts-react-official";
@@ -143,7 +145,7 @@ class SearchForm extends React.Component {
 
             if(this.state.fields.length===0){
                 this.addFilterNamed([
-                    "BTyperDB_ID",
+                    "Country",
                     "N50",
                     "Completeness",
                     "Contamination"
@@ -781,7 +783,7 @@ class TheMap extends React.Component {
         type: "pie"
       },
       title: {
-        text: ""
+        text: "GTDB Bacillus Cereus Group Species"
       },
       credits: {
         enabled: false
@@ -879,15 +881,18 @@ class App extends React.Component {
             console.error(error);
           });
   }
-
+  
 
   render() {
     return (
       <div className="App">
         <header className="App-header">
-          <p>
-            BTyper - by Carroll lab
-          </p>
+        <p>
+        <BTyperDBIcon style={{ height: 100, width: 100 }} />
+        <BTyperDBLogo />
+        by Carroll lab
+        <img src={carrolllabicon} style={{ height: 120, width:110 }} /> 
+        </p>
         </header>
         <div className="App-divider">
           Filter strains
@@ -896,7 +901,7 @@ class App extends React.Component {
           <SearchForm search_callback={this.handleSearch}/>
         </div>
         <div className="App-divider">
-          Strains across the world
+          Bacillus Cereus Group Strains across the world
         </div>
         <div className="withspacer">
             <TheMap query={this.state.query} straindata={this.state.straindata} />
@@ -913,6 +918,8 @@ class App extends React.Component {
 }
 
 //straindata={this.state.straindata}
+
+
 
 export default App;
 

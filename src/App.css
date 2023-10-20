@@ -1,5 +1,5 @@
 .App {
-  text-align: center;
+  text-align: left;
 }
 
 .App-logo {
@@ -26,24 +26,26 @@ div.divSearchField {
 
 div.divtable {
 position: absolute;
-    left: 50px;
-    width: calc(100% - 100px);
+    left: 10px;
+    width: calc(100% - 10px);
 
 /*  width: 500px;*/
-  height: 500px;
-  overflow: auto;
+  height: 1000px;
+  overflow: scroll;
 }
 
 
 .App-header {
-  background-color: #282c34;
+  background-color: #ffffff;
   min-height: 10vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  font-size: calc(5px + 2vmin);
+  color:#0096ff; 
+  font-weight: bold;
+  /*rgb(15, 96, 163);*/
 }
 
 .withspacer {
@@ -57,9 +59,10 @@ position: absolute;
   margin-left: 5px;
   margin-right: 5px;
 
-color: #fff;
-  background-color: #337ab7;
-  border-color: #2e6da4;
+color: #ffffff;
+  background-color: #0096ff;
+  border-color: #0096ff;
+  font-weight: bold;
 
 /*
   color: #333;
@@ -71,14 +74,15 @@ color: #fff;
 
 
 .App-divider {
-  background-color: #FF1493;
+  background-color: #0096ff;
   min-height: 3vh;
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: row;
+  align-items: normal;
   justify-content: center;
   font-size: calc(10px + 1vmin);
-  color: white;
+  color: #ffffff;
+  font-weight: bold;
 }
 
 .App-body {
