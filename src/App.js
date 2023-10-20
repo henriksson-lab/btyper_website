@@ -890,7 +890,7 @@ class App extends React.Component {
         <p>
         <BTyperDBIcon style={{ height: 100, width: 100 }} />
         <BTyperDBLogo />
-        by Carroll lab
+        by the CompMicroLab @ UmU
         <img src={carrolllabicon} style={{ height: 120, width:110 }} /> 
         </p>
         </header>
@@ -901,7 +901,7 @@ class App extends React.Component {
           <SearchForm search_callback={this.handleSearch}/>
         </div>
         <div className="App-divider">
-          Bacillus Cereus Group Strains across the world
+        Selected Bacillus cereus group strains
         </div>
         <div className="withspacer">
             <TheMap query={this.state.query} straindata={this.state.straindata} />
