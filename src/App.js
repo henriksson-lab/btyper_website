@@ -5,6 +5,10 @@ import React from 'react';
 import {ReactComponent as BTyperDBLogo} from './images/Btyperdb_logo.svg';
 import {ReactComponent as BTyperDBIcon} from './images/BTyperdb_icon.svg';
 import carrolllabicon from './images/carrolllab_icon.png';
+import MIMSLogo from './images/MIMS_logo.png';
+import UCMRLogo from './images/UCMR_logo.png';
+import UmULogo from './images/UmU_logo.png';
+import SciLifeLabLogo from './images/SciLifeLab_logo.png';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import PieChart from "highcharts-react-official";
@@ -783,7 +787,7 @@ class TheMap extends React.Component {
         type: "pie"
       },
       title: {
-        text: "GTDB Bacillus Cereus Group Species"
+        text: "GTDB <i>Bacillus cereus</i> Group Species"
       },
       credits: {
         enabled: false
@@ -901,7 +905,7 @@ class App extends React.Component {
           <SearchForm search_callback={this.handleSearch}/>
         </div>
         <div className="App-divider">
-        Selected Bacillus cereus group strains
+          Selected &nbsp;<i>Bacillus cereus</i>&nbsp; group strains
         </div>
         <div className="withspacer">
             <TheMap query={this.state.query} straindata={this.state.straindata} />
@@ -912,10 +916,17 @@ class App extends React.Component {
         <div className="divtable" id="divfortable">
           <TheTable query={this.state.query} straindata={this.state.straindata} />
         </div>
+        <div className="App-footer">
+        <img src={UmULogo} style={{ height: 80, width:200 }} /> 
+        <img src={SciLifeLabLogo} style={{ height: 80, width:200 }} /> 
+        <img src={MIMSLogo} style={{ height: 80, width:200 }} /> 
+        <img src={UCMRLogo} style={{ height: 80, width:200 }} /> 
+        </div>
       </div>
     );
   }
 }
+
 
 //straindata={this.state.straindata}
 

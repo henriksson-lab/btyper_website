@@ -13,10 +13,9 @@
   }
 }
 
-
 table.divtable2 {
     display: block;
-    overflow-x: auto;
+    overflow-x: scroll;
     white-space: nowrap;
 }
 
@@ -31,9 +30,8 @@ position: absolute;
 
 /*  width: 500px;*/
   height: 1000px;
-  overflow: scroll;
+  overflow: auto;
 }
-
 
 .App-header {
   background-color: #ffffff;
@@ -71,8 +69,6 @@ color: #ffffff;
 */
 }
 
-
-
 .App-divider {
   background-color: #0096ff;
   min-height: 3vh;
@@ -108,10 +104,6 @@ color: #ffffff;
   }
 }
 
-
-
-
-
 #container_map {
   height: 500px;
   min-width: 310px;
@@ -119,3 +111,14 @@ color: #ffffff;
   margin: 0 auto;
 }
 
+.App-footer {
+  background-color: #ffffff;
+  max-height: 20vh;
+  display: flex;
+  justify-content: center;
+  gap : 100px;
+  position:fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
