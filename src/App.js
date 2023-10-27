@@ -890,7 +890,7 @@ class App extends React.Component {
   render() {
     return (
       <div className="App">
-        <header className="App-header">
+        <header className="App-header"> 
         <p>
         <BTyperDBIcon style={{ height: 100, width: 100 }} />
         <BTyperDBLogo />
@@ -898,6 +898,9 @@ class App extends React.Component {
         <img src={carrolllabicon} style={{ height: 120, width:110 }} /> 
         </p>
         </header>
+        <div className="Logo-info">
+          A comprehensive atlas of high quality&nbsp;<i>Bacillus cereus</i>&nbsp;group genomes with standardized metadata
+        </div>
         <div className="App-divider">
           Filter strains
         </div>
