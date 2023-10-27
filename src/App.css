@@ -35,15 +35,27 @@ position: absolute;
 
 .App-header {
   background-color: #ffffff;
-  min-height: 10vh;
+  min-height: 5vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(5px + 2vmin);
+  font-size: calc(5px + 1vmin);
   color:#0096ff; 
   font-weight: bold;
   /*rgb(15, 96, 163);*/
+}
+
+.Logo-info {
+  background-color: #ffffff;
+  min-height: 5vh;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 1vmin);
+  color: #000000;
+  font-weight: bold;
 }
 
 .withspacer {

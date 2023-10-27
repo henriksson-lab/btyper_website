@@ -25,3 +25,6 @@ yarn-error.log*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+
+#fnastore - config file
+/backend/config.json
