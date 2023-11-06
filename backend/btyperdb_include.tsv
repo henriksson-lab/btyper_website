@@ -1,0 +1,63 @@
+column_id	column_type	default_v1	default_v2	display	search	print	notes
+BTyperDB_ID	text			1	1	1	search via text box; exact match only
+Internal_ID	text			0	0	1	
+NCBI_BioSample	text			0	1	1	search via text box; exact match only
+NCBI_BioProject	text			0	1	1	search via text box; exact match only
+Strain	text			0	1	1	search via text box; exact match only
+Collection_Year	integer			1	1	1	"search via numerical range; values with uncertainty have square brackets, e.g., [1990,1996]; genomes with unknown year have ""Unknown""; users often want to exclude ""Unknown"""
+Continent	text			1	1	1	"search via drop down menu, check box, or similar; one of ""Africa"", ""Antarctica"", ""Asia"", ""Europe"", ""North America"", ""Ocean"", ""Oceania"", ""Other"", ""South America"", or ""Unknown""; users often want to exclude genomes with ""Unknown"""
+Country	text			1	1	1	"search via text box; exact match only; could also possibly search via drop down menu; genomes with unknown country have ""Unknown""; users often want to exclude ""Unknown"""
+Region	text			1	1	1	"search via text box; exact match only; genomes with unknown region have ""Unknown""; users may want to exclude ""Unknown"""
+Country_Code	text			0	1	1	"search via text box; exact match only; alternatively, may want to search via drop down menu; genomes with unknown country code have ""Unknown""; users often want to exclude ""Unknown"""
+Region_Code	text			0	1	1	"search via text box; exact match only; genomes with unknown region code have ""Unknown""; users may want to exclude ""Unknown"""
+Source_1	text			1	1	1	"search via drop down menu, check box, or similar; one of ""Animal_Mammal"", ""Animal_Other"", ""Animal_Unspecified"", ""Biocontrol_Agent"", ""Consumer_Product"", ""Environmental"", ""Food"", ""Human"", ""Laboratory"", or ""Unknown""; users often want to exclude genomes with ""Unknown"" and/or ""Laboratory"""
+Source_2	text			1	1	1	"search via drop down menu, check box, or similar; one of ""Animal_Mammal:Clinical"", ""Animal_Mammal:Non-Clinical"", ""Animal_Mammal:Unspecified"", ""Animal_Other"", ""Animal_Unspecified"", ""Biocontrol_Agent"", ""Consumer_Product"", ""Environmental"", ""Food"", ""Human:Clinical"", ""Human:Non-Clinical"", ""Human:Unspecified"", ""Laboratory"", or ""Unknown""; users often want to exclude genomes with ""Unknown"" and/or ""Laboratory"""
+Source_3	text			1	0	1	
+Human_Illness	text			1	1	1	"search via drop down menu, check box, or similar; one of ""Anthrax"", ""Foodborne_Illness:Diarrheal"", ""Foodborne_Illness:Emetic"", ""Foodborne_Illness:Unspecified"", ""Other"", or ""Unknown""; users may want to exclude genomes with ""Unknown"""
+Human_Outbreak	text			0	1	1	"search via drop down menu with either ""Unknown"" or ""Not Unknown"" (excludes genomes with ""Unknown"" and takes everything else)"
+Free_Text	text			1	0	1	
+BTyper3_species(ANI)	text			1	0	1	
+BTyper3_subspecies(ANI)	text			1	0	1	
+BTyper3_Pseudo_Gene_Flow_Unit(ANI)	text			1	0	1	
+BTyper3_Closest_Type_Strain(ANI)	text			1	0	1	
+BTyper3_anthrax_toxin(genes)	text			1	0	1	
+BTyper3_emetic_toxin_cereulide(genes)	text			1	0	1	
+BTyper3_diarrheal_toxin_Nhe(genes)	text			1	0	1	
+BTyper3_diarrheal_toxin_Hbl(genes)	text			1	0	1	
+BTyper3_diarrheal_toxin_CytK(top_hit)	text			1	0	1	
+BTyper3_sphingomyelinase_Sph(gene)	text			1	0	1	
+BTyper3_capsule_Cap(genes)	text			1	0	1	
+BTyper3_capsule_Has(genes)	text			1	0	1	
+BTyper3_capsule_Bps(genes)	text			1	0	1	
+BTyper3_Bt(genes)	text			1	0	1	
+BTyper3_PubMLST_ST[clonal_complex](perfect_matches)	text			1	0	1	
+BTyper3_Adjusted_panC_Group(predicted_species)	text			1	0	1	
+BTyper3_final_taxon_names	text			1	0	1	
+GTDB_Species	text			1	1	1	search via text box; exact match only; alternatively, can use drop down menu or something similar
+Completeness	float	95	1000	1	1	1	search via numerical range; users usually want to find values greater than or equal to a specific value, e.g., >= 95
+Contamination	float	-1	5	1	1	1	search via numerical range; users usually want to find values less than or equal to a specific value, e.g., <= 5
+N_Contigs	integer			1	1	1	search via numerical range; users usually want to find values less than or equal to a specific value, e.g., <= 1000
+Total_Length	integer			0	0	1	
+GC	float			0	0	1	
+N50	integer	20000	1000000000	1	1	1	search via numerical range; users usually want to find values greater than or equal to a specific value, e.g., >= 100000
+Largest_Contig	integer			0	0	1	
+Ns_per_Kbp	float			0	0	1	
+Metadata_Source	text			0	0	1	
+Curator_Notes	text			0	0	1	
+Changelog	text			0	0	1	
+matchcol_BTyper3_species	text			0	1	0	"searchable column for ""BTyper3_species(ANI)""; can use a drop down menu or something similar"
+matchcol_BTyper3_subspecies	text			0	1	0	"searchable column for ""BTyper3_subspecies(ANI)""; can use a drop down menu or something similar"
+matchcol_BTyper3_Pseudo_Gene_Flow_Unit	text			0	1	0	"searchable column for ""BTyper3_Pseudo_Gene_Flow_Unit(ANI)""; can use a drop down menu or something similar"
+matchcol_BTyper3_Closest_Type_Strain	text			0	1	0	"searchable column for ""BTyper3_Closest_Type_Strain(ANI)""; can use a drop down menu or something similar"
+matchcol_BTyper3_anthrax_toxin	integer			0	1	0	"searchable column for ""BTyper3_anthrax_toxin(genes)""; search via numerical range; users will likely want to find genomes with exactly 0 or 3 genes, or with >= 2 genes"
+matchcol_BTyper3_emetic_toxin_cereulide	integer			0	1	0	"searchable column for ""BTyper3_emetic_toxin_cereulide(genes)""; search via numerical range; users will likely want to find genomes with exactly 0 or 4 genes, or with >= 2 genes"
+matchcol_BTyper3_diarrheal_toxin_Nhe	integer			0	1	0	"searchable column for ""BTyper3_diarrheal_toxin_Nhe(genes)""; search via numerical range; users will likely want to find genomes with exactly 0 or 3 genes, or with >= 1 gene"
+matchcol_BTyper3_diarrheal_toxin_Hbl	integer			0	1	0	"searchable column for ""BTyper3_diarrheal_toxin_Hbl(genes)""; search via numerical range; users will likely want to find genomes with exactly 0 or 4 genes, or with >= 1 gene"
+matchcol_BTyper3_diarrheal_toxin_CytK	text			0	1	0	"searchable column for ""BTyper3_diarrheal_toxin_CytK(top_hit)""; search via drop down menu or something similar; can be ""cytK-1"", ""cytK-2"", or ""Absent"""
+matchcol_BTyper3_sphingomyelinase_Sph	text			0	1	0	"searchable column for ""BTyper3_sphingomyelinase_Sph(gene)""; search via drop down menu or something similar; can be ""Present"" or ""Absent"""
+matchcol_BTyper3_capsule_Cap	integer			0	1	0	"searchable column for ""BTyper3_capsule_Cap(genes)""; search via numerical range; users will likely want to find genomes with exactly 0 or 5 genes, or with >= 3 genes"
+matchcol_BTyper3_capsule_Has	integer			0	1	0	"searchable column for ""BTyper3_capsule_Has(genes)""; search via numerical range; users will likely want to find genomes with exactly 0 or 3 genes, or with >= 2 genes"
+matchcol_BTyper3_capsule_Bps	integer			0	1	0	"searchable column for ""BTyper3_capsule_Bps(genes)""; search via numerical range; users will likely want to find genomes with exactly 0 or 9 genes, or with >=4 genes"
+matchcol_BTyper3_Bt	text			0	1	0	"searchable column for ""BTyper3_Bt(genes)""; search via drop down menu or similar; can be ""Present or Absent"""
+matchcol_BTyper3_PubMLST_ST	text			0	1	0	"searchable column for ""BTyper3_PubMLST_ST[clonal_complex](perfect_matches)""; search via text box; exact matches only"
+matchcol_BTyper3_Adjusted_panC_Group	text			0	1	0	"searchable column for ""BTyper3_Adjusted_panC_Group(predicted_species)""; search via drop down menu or something similar"

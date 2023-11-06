@@ -16,14 +16,31 @@ f.close()
 path_fna = Path(config["fnastore"])
 
 
+
+################################################################################################
+coldesc = pd.read_csv("btyperdb_include.tsv",sep="\t")
+coldesc = coldesc.fillna("")
+
+#TODO check these columns in the CSV: column_id       column_type     default_v1      default_v2
+
+#TODO check types are valid. text integer float
+
+#### Figure out what columns to keep for display, printing, etc
+list_column_display = list(coldesc[coldesc["display"]==1]["column_id"])
+list_column_search  = list(coldesc[coldesc["search"]==1]["column_id"])
+list_column_print   = list(coldesc[coldesc["print"]==1]["column_id"])
+
+
+#TODO check all columns present in sql
+
+
+
 ################################################################################################
 #
 ################################################################################################
 @app.route("/column_desc")
-def column_desc():
-    f = pd.read_csv("column_desc.csv2",sep="\t")
-    f = f.fillna("")
-    return f.to_json(orient="records")
+def get_column_desc():
+    return coldesc.to_json(orient="records")
 
 
 def cleanfieldname(s):
@@ -33,8 +50,18 @@ def cleanfieldname(s):
 #
 ################################################################################################
 @app.route("/straindata", methods=['GET', 'POST'])
-def gettable():
-    content = request.json
+def get_straindata():
+
+    #print(request.json)
+    #print(request.json.keys)
+
+    content = request.json["query"]  ### changed!!! 
+    keep_display = request.json["keep_display"]
+    keep_print   = request.json["keep_print"]  ### added
+    keep_strains = None
+    if "keep_strains" in request.json:
+      keep_strains = request.json["keep_strains"]
+
     print(content)
     list_constraint=[]
     list_vars=[]
@@ -43,7 +70,7 @@ def gettable():
             list_constraint.append(
                 "\""+cleanfieldname(c["field"])+"\" = ?")
             list_vars.append(c["value"])
-        elif c["column_type"]=="number":
+        elif c["column_type"]=="integer" or c["column_type"]=="float":
             list_constraint.append(
                 "\""+cleanfieldname(c["field"])+"\""+
                 " > ? and "+
@@ -60,25 +87,58 @@ def gettable():
     print(constraint)
     print(list_vars)
 
+    #Extract data from SQL database
     conn = sql.connect('data.sqlite')
     cursor = conn.cursor()
     if constraint=="":
-      cursor.execute("SELECT * from straindata limit 100")
+      if keep_strains is not None:
+        cursor.execute("SELECT * from straindata")
+      else:
+        cursor.execute("SELECT * from straindata limit 100")
     else:
       cursor.execute("SELECT * from straindata where "+constraint, list_vars)
     df=pd.DataFrame(cursor.fetchall())
-
     conn.close()
 
+    #Figure out output format
+    outformat = None
+    if "get_format" in request.json:
+      outformat = request.json["get_format"]
+    print(outformat)
+
+    #Check if we got any data out of the database at all
     if df.shape[0]>0:
+      #Extract column names
       num_fields = len(cursor.description)
       field_names = [i[0] for i in cursor.description]
-      df.columns= field_names
-      print(df)
-      return df.to_json()
+      df.columns = field_names
+
+      #Optionally remove columns, reduces amount of data sent
+      to_keep_col = []
+      if keep_display=="true":
+         to_keep_col = to_keep_col + list_column_display
+      if keep_print=="true":
+         to_keep_col = to_keep_col + list_column_print
+      to_keep_col = set(to_keep_col)
+      df = df.drop(columns=[col for col in df if col not in to_keep_col])
+
+      #If specified, only keep some strains
+      if keep_strains is not None:
+        #print(keep_strains)
+        df = df[df["BTyperDB_ID"].isin(keep_strains)]
+
+      #Return data
+      if outformat == "text/csv":
+        return df.to_csv()
+      else:
+        return df.to_json()
     else:
+      #Return data; could make it have at least the name of columns line! TODO
       print("empty")
-      return "[]"
+      if outformat == "text/csv":
+        return ""
+      else:
+        return "[]"
 
 
 ################################################################################################

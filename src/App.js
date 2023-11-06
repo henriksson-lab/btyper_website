@@ -58,8 +58,10 @@ class SearchField extends React.Component {
     if(target.name==="selectfield"){
       state.field = event.target.value;
       var fieldmeta = this.dict_fieldmeta[state.field];
-      state.value = fieldmeta.v1;
-      state.value2 = fieldmeta.v2;
+//console.log("6667");
+//console.log(fieldmeta);
+      state.value = fieldmeta.default_v1;
+      state.value2 = fieldmeta.default_v2;
       state.column_type = fieldmeta.column_type;
     } else if(target.name==="value"){
       state.value = event.target.value;
@@ -67,9 +69,9 @@ class SearchField extends React.Component {
       state.value2 = event.target.value
     }
 
-    console.log("new");
-    console.log(state);
-    console.log(this.dict_fieldmeta);
+//    console.log("new");
+//    console.log(state);
+//    console.log(this.dict_fieldmeta);
     this.handleChangeCB(state);
   }
 
@@ -90,7 +92,7 @@ class SearchField extends React.Component {
       inputfield.push((<label>
         {'\u00A0'} is: <input type="text" value={state.value} onChange={this.handleChange} name="value"/>
       </label>));
-    } else if(current_fieldmeta.column_type==="number"){
+    } else if(current_fieldmeta.column_type==="integer" || current_fieldmeta.column_type==="float"){
       inputfield.push((<label>
         {'\u00A0'} From: <input type="text" value={state.value}  onChange={this.handleChange} name="value"/>
         {'\u00A0'} To:   <input type="text" value={state.value2} onChange={this.handleChange} name="value2"/>
@@ -102,7 +104,7 @@ class SearchField extends React.Component {
           <button onClick={this.handleDelete} name="bDelete" className="buttonspacer">X</button>
           <select value={state.field} onChange={this.handleChange} name="selectfield">
                 {
-                    this.fieldmeta.map((item, index) => (
+                    this.fieldmeta.filter((item, index) => item.search===1).map((item, index) => (
                         <option value={item.column_id} key={state.id+"--"+index}>{item.column_id}</option>
                     ))
                 }
@@ -145,6 +147,9 @@ class SearchForm extends React.Component {
           .then((response) => response.json())
           .then((responseJson) => {
             this.fieldmeta = responseJson;
+
+////////// 666 TODO -- filter entries, only keep with display==="1"
+
             this.dict_fieldmeta = Object.fromEntries(this.fieldmeta.map(x => [x.column_id, x]));
 
             if(this.state.fields.length===0){
@@ -179,8 +184,8 @@ class SearchForm extends React.Component {
         var current_fieldmeta = this.dict_fieldmeta[column_id];
         return({
           field: column_id,
-          value: current_fieldmeta.v1,
-          value2: current_fieldmeta.v2,
+          value: current_fieldmeta.default_v1,
+          value2: current_fieldmeta.default_v2,
           column_type: current_fieldmeta.column_type,
           id: newkey
         });
@@ -244,6 +249,8 @@ class TheTable extends React.Component {
     this.handleFastaSelected = this.handleFastaSelected.bind(this);
     this.handleStrainlistAll = this.handleStrainlistAll.bind(this);
     this.handleStrainlistSelected = this.handleStrainlistSelected.bind(this);
+    this.handleStrainmetaAll = this.handleStrainmetaAll.bind(this);
+    this.handleStrainmetaSelected = this.handleStrainmetaSelected.bind(this);
     this.handleChangeSelected = this.handleChangeSelected.bind(this);
   }
 
@@ -271,7 +278,7 @@ class TheTable extends React.Component {
         'rest/getfasta',{
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(query)
+            body: JSON.stringify(query) /////////////////////////// TODO seems to ignore listFasta?????
     }).then(res => {
           const readableStream = res.body
           if (window.WritableStream && readableStream.pipeTo) {
@@ -288,27 +295,59 @@ class TheTable extends React.Component {
     })
   }
 
-  downloadIdList(listFasta){
+
+  /*
+   * Take a string and make it downloadable with the given filename
+   */
+  downloadString(s, fname) {
     // from view-source:https://jimmywarting.github.io/StreamSaver.js/examples/fetch.html
-    const fileStream = this.streamSaver.createWriteStream('listid.txt');
-    const inp=listFasta.join("\n");
-    const readableStream = new Response(inp).body;
+    const fileStream = this.streamSaver.createWriteStream(fname);
+    const readableStream = new Response(s).body;
     if (window.WritableStream && readableStream.pipeTo) {
-    return readableStream.pipeTo(fileStream)
-      .then(() => console.log('done writing'))
+      return readableStream.pipeTo(fileStream).then(() => console.log('done writing'))
     }
-    window.writer = fileStream.getWriter()
-    const reader = new Response(inp).body.getReader()
-    const pump = () => reader.read()
-    .then(res => res.done
+    window.writer = fileStream.getWriter();
+    const reader = new Response(s).body.getReader();
+    const pump = () => reader.read().then(res => res.done
       ? window.writer.close()
-      : window.writer.write(res.value).then(pump))
-    pump()
+      : window.writer.write(res.value).then(pump));
+    pump();
   }
 
+
+  /*
+   * Download list of strain IDs
+   */
+  downloadIdList(listFasta){
+console.log("34534534");
+    console.log(listFasta);
+    this.downloadString(listFasta.join("\n"), "strainlist.txt");
+  }
+
+
+  /*
+   * Download metadata for strain IDs
+   */
+  downloadMetadata(listFasta){
+    var query = {query:[], keep_display:"false", keep_print:"true", keep_strains:listFasta, get_format:"text/csv"};
+
+    //Get data asynch, this time keeping data to print.
+    //Note: empty query. could keep last query to speed up TODO
+    fetch('rest/straindata', {method: 'POST', headers: {'Content-Type': 'application/json'}, body:JSON.stringify(query)})
+	  .then((response) => response.text())
+          .then((responseTSV) => {
+            this.downloadString(responseTSV,"strainmeta.tsv");
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+  }
+
+
+  /////////////////////// Strain FASTA downloading ////////
   handleFastaAll(){
-      if(this.state.straindata!==null){
-          var listStrains = Object.values(this.state.straindata.strain);
+      if(this.props.straindata!==null){
+          var listStrains = Object.values(this.props.straindata.BTyperDB_ID);
           this.downloadFasta(listStrains);
       } else {
         console.log("not ready to download yet");
@@ -324,10 +363,10 @@ class TheTable extends React.Component {
       }
   }
 
-
+  /////////////////////// Strain list downloading ////////
   handleStrainlistAll(){
-      if(this.state.straindata!==null){
-          var listStrains = Object.values(this.state.straindata.strain);
+      if(this.props.straindata!==null){
+          var listStrains = Object.values(this.props.straindata.BTyperDB_ID);
           this.downloadIdList(listStrains);
       } else {
         console.log("not ready to download yet");
@@ -345,6 +384,29 @@ class TheTable extends React.Component {
   }
 
 
+  /////////////////////// Strain metadata downloading ////////
+  handleStrainmetaAll(){
+      if(this.props.straindata!==null){
+          var listStrains = Object.values(this.props.straindata.BTyperDB_ID);
+          this.downloadMetadata(listStrains);
+      } else {
+        console.log("not ready to download yet");
+      }
+  }
+
+
+  handleStrainmetaSelected(){
+      var listStrains=this.state.selected;
+      if(listStrains.length===0){
+          alert("No strains selected");
+      } else {
+          this.downloadMetadata(listStrains);
+      }
+  }
+
+
+
+//BTyperDB_ID
   handleChangeSelected(event) {
       var updatedList = [...this.state.selected];
       if (event.target.checked) {
@@ -377,12 +439,20 @@ class TheTable extends React.Component {
 
     var fieldid=0;
 
+
+///////// 6666 todo filter columns to show --- "display" column
+
     return (
       <div>
       <button name="bFastaAll" className="buttonspacer" onClick={this.handleFastaAll}>Download all FASTA</button>
       <button name="bFastaSelected" className="buttonspacer" onClick={this.handleFastaSelected}>Download selected FASTA</button>
-      <button name="bStrainlistAll" className="buttonspacer" onClick={this.handleStrainlistAll}>Download list of all strains</button>
-      <button name="bStrainlistSelected" className="buttonspacer" onClick={this.handleStrainlistSelected}>Download list of selected strains</button>
+.
+      <button name="bStrainlistAll" className="buttonspacer" onClick={this.handleStrainlistAll}>Download all strain IDs</button>
+      <button name="bStrainlistSelected" className="buttonspacer" onClick={this.handleStrainlistSelected}>Download selected strain IDs</button>
+.
+      <button name="bStrainmetaAll" className="buttonspacer" onClick={this.handleStrainmetaAll}>Download all metadata</button>
+      <button name="bStrainmetaSelected" className="buttonspacer" onClick={this.handleStrainmetaSelected}>Download selected metadata</button>
+
       <table>
         <thead>
           <tr>
@@ -693,7 +763,8 @@ class TheMap extends React.Component {
 
     //Collect counts
     var straindata = this.props.straindata;
-    if(straindata != null){
+console.log(straindata);
+    if(straindata != null && straindata.length>0){
 
     var list_country = Object.values(straindata["Country_Code"]);
 
@@ -860,7 +931,6 @@ class App extends React.Component {
   }
 
   handleSearch(q){
-    //this.setState({query:q, straindata:null});
     this.asynchUpdate(q);
   }
 
@@ -870,9 +940,13 @@ class App extends React.Component {
     }
   }
 
+  /**
+   * Asynchronously update the user interface. Requests data for display, updates when data received
+   */
   asynchUpdate(query){
-      //var query = this.props.query;
-      fetch('rest/straindata', {method: 'POST', headers: {'Content-Type': 'application/json'}, body:JSON.stringify(query)})
+
+      fetch('rest/straindata', {method: 'POST', headers: {'Content-Type': 'application/json'}, 
+             body:JSON.stringify({query:query, keep_display:"true", keep_print:"false"})})
           .then((response) => response.json())
           .then((responseJson) => {
             console.log("got new data");
@@ -885,7 +959,6 @@ class App extends React.Component {
             console.error(error);
           });
   }
-  
 
   render() {
     return (
@@ -895,7 +968,7 @@ class App extends React.Component {
         <BTyperDBIcon style={{ height: 100, width: 100 }} />
         <BTyperDBLogo />
         by the CompMicroLab @ UmU
-        <img src={carrolllabicon} style={{ height: 120, width:110 }} /> 
+        <img src={carrolllabicon} alt="" style={{ height: 120, width:110 }} /> 
         </p>
         </header>
         <div className="Logo-info">
@@ -920,10 +993,10 @@ class App extends React.Component {
           <TheTable query={this.state.query} straindata={this.state.straindata} />
         </div>
         <div className="App-footer">
-        <img src={UmULogo} style={{ height: 80, width:200 }} /> 
-        <img src={SciLifeLabLogo} style={{ height: 80, width:200 }} /> 
-        <img src={MIMSLogo} style={{ height: 80, width:200 }} /> 
-        <img src={UCMRLogo} style={{ height: 80, width:200 }} /> 
+        <img alt="" src={UmULogo} style={{ height: 80, width:200 }} /> 
+        <img alt="" src={SciLifeLabLogo} style={{ height: 80, width:200 }} /> 
+        <img alt="" src={MIMSLogo} style={{ height: 80, width:200 }} /> 
+        <img alt="" src={UCMRLogo} style={{ height: 80, width:200 }} /> 
         </div>
       </div>
     );
