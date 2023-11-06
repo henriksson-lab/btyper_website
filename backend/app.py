@@ -34,6 +34,18 @@ list_column_print   = list(coldesc[coldesc["print"]==1]["column_id"])
 #TODO check all columns present in sql
 
 
+################################################################################################
+# Cleaning of input data, for security
+################################################################################################
+
+#SQL fields
+def cleanfieldname(s):
+    return ''.join(c for c in s if c.isalpha() or c.isnumeric() or c=="(" or c==")" or c=="_" or c=="[" or c=="]" or c==" ")
+
+#should be like BTDB_2022-0000002.1.fna
+def cleanfilename(s):
+    return ''.join(c for c in s if c.isalpha() or c.isnumeric() or c=="_" or c=="-" or c==".")
+
 
 ################################################################################################
 #
@@ -43,8 +55,6 @@ def get_column_desc():
     return coldesc.to_json(orient="records")
 
 
-def cleanfieldname(s):
-    return ''.join(c for c in s if c.isalpha() or c.isnumeric() or c=="(" or c==")" or c=="_" or c=="[" or c=="]" or c==" ")
 
 ################################################################################################
 #
@@ -152,8 +162,7 @@ def getfasta():
 
     list_fasta = request.json
     for id in list_fasta:
-        # TODO clean up id content
-        fs = path_fna / (id+".fna")
+        fs = path_fna / (cleanfilename(id)+".fna")
         print(fs)
         if fs.exists():
             paths.append({

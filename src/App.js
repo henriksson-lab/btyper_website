@@ -42,10 +42,16 @@ class SearchField extends React.Component {
   }
 
 
+  /*
+   *
+   */
   handleDelete(event) {
     this.handleDeleteCB(this.props.id);
   }
 
+  /*
+   *
+   */
   handleChange(event) {
     const target = event.target;
     var state = {
@@ -58,8 +64,6 @@ class SearchField extends React.Component {
     if(target.name==="selectfield"){
       state.field = event.target.value;
       var fieldmeta = this.dict_fieldmeta[state.field];
-//console.log("6667");
-//console.log(fieldmeta);
       state.value = fieldmeta.default_v1;
       state.value2 = fieldmeta.default_v2;
       state.column_type = fieldmeta.column_type;
@@ -69,14 +73,14 @@ class SearchField extends React.Component {
       state.value2 = event.target.value
     }
 
-//    console.log("new");
-//    console.log(state);
-//    console.log(this.dict_fieldmeta);
     this.handleChangeCB(state);
   }
 
 
 
+  /*
+   *
+   */
   render() {
     var state = {
         field: this.props.field,
@@ -142,13 +146,14 @@ class SearchForm extends React.Component {
     this.handleFieldDelete = this.handleFieldDelete.bind(this);
   }
 
+  /*
+   *
+   */
   componentDidMount() {
       fetch('rest/column_desc')
           .then((response) => response.json())
           .then((responseJson) => {
             this.fieldmeta = responseJson;
-
-////////// 666 TODO -- filter entries, only keep with display==="1"
 
             this.dict_fieldmeta = Object.fromEntries(this.fieldmeta.map(x => [x.column_id, x]));
 
@@ -166,18 +171,27 @@ class SearchForm extends React.Component {
           });
   }
 
+  /*
+   *
+   */
   handleFieldDelete(id){
     this.setState({
       fields: this.state.fields.filter((e) => e.id !== id)
     });
   }
 
+  /*
+   *
+   */
   handleFieldChange(newfield){
         this.setState({
           fields: this.state.fields.map((e) => e.id===newfield.id ? newfield : e)
         });
   }
 
+  /*
+   *
+   */
   addFilterNamed(list_column_id) {
     var newfields = list_column_id.map((column_id) => {
         const newkey=this.nextkey++;
@@ -195,12 +209,17 @@ class SearchForm extends React.Component {
   }
 
 
+  /*
+   *
+   */
   handleAddFilter() {
     this.addFilterNamed(["BTyperDB_ID"]);
   }
 
+  /*
+   *
+   */
   handleSearch() {
-  console.log(this.state.fields);
     this.search_callback(this.state.fields);
   }
 
@@ -254,6 +273,9 @@ class TheTable extends React.Component {
     this.handleChangeSelected = this.handleChangeSelected.bind(this);
   }
 
+  /*
+   *
+   */
   componentDidMount() {
     // HACK: streamsaver references window which is undefined on SSR. Ensure library is only loaded on client
     try {
@@ -269,16 +291,18 @@ class TheTable extends React.Component {
 
 
 
-
+  /*
+   * Download list of fasta files named by IDs.
+   * from view-source:https://jimmywarting.github.io/StreamSaver.js/examples/fetch.html
+   */
   downloadFasta(listFasta){
     const fileStream = this.streamSaver.createWriteStream('fasta.zip');
-    // from view-source:https://jimmywarting.github.io/StreamSaver.js/examples/fetch.html
-    var query={}
+    var query=listFasta;
     fetch(
         'rest/getfasta',{
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(query) /////////////////////////// TODO seems to ignore listFasta?????
+            body: JSON.stringify(query)
     }).then(res => {
           const readableStream = res.body
           if (window.WritableStream && readableStream.pipeTo) {
@@ -319,8 +343,6 @@ class TheTable extends React.Component {
    * Download list of strain IDs
    */
   downloadIdList(listFasta){
-console.log("34534534");
-    console.log(listFasta);
     this.downloadString(listFasta.join("\n"), "strainlist.txt");
   }
 
@@ -433,14 +455,14 @@ console.log("34534534");
 
     var colnames=Object.keys(straindata);
 
-//    var num_rows = straindata["column_id"].length;
     var num_rows = Object.keys(straindata["BTyperDB_ID"]).length;  //ugly. should not have row indices on each entry
     var row_nums = Array.from(Array(num_rows).keys())
 
     var fieldid=0;
 
 
-///////// 6666 todo filter columns to show --- "display" column
+    //Note: selection is slow. this is a react thing. might be related to warning about children should have unique keys
+    //  https://react.dev/learn/rendering-lists#keeping-list-items-in-order-with-key
 
     return (
       <div>
@@ -763,7 +785,6 @@ class TheMap extends React.Component {
 
     //Collect counts
     var straindata = this.props.straindata;
-console.log(straindata);
     if(straindata != null && straindata.length>0){
 
     var list_country = Object.values(straindata["Country_Code"]);
@@ -777,8 +798,6 @@ console.log(straindata);
     for (const num of list_country) {
         counts2[num] = counts2[num] ? counts2[num] + 1 : 1;
     }
-    console.log(999);
-    console.log(counts2);
 
 //for some reason both "" and null in this list
 
