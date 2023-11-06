@@ -779,13 +779,16 @@ class TheMap extends React.Component {
   }
 
 
+  /**
+   * Note: country_code must be displayed for this to work
+   */
   render() {
 
     this.data=[];
 
     //Collect counts
     var straindata = this.props.straindata;
-    if(straindata != null && straindata.length>0){
+    if(straindata != null && Object.keys(straindata).length>0){
 
     var list_country = Object.values(straindata["Country_Code"]);
 
