@@ -5,10 +5,9 @@ import React from 'react';
 import {ReactComponent as BTyperDBLogo} from './images/Btyperdb_logo.svg';
 import {ReactComponent as BTyperDBIcon} from './images/BTyperdb_icon.svg';
 import carrolllabicon from './images/carrolllab_icon.png';
-import MIMSLogo from './images/MIMS_logo.png';
-import UCMRLogo from './images/UCMR_logo.png';
-import UmULogo from './images/UmU_logo.png';
-import SciLifeLabLogo from './images/SciLifeLab_logo.png';
+import {ReactComponent as MIMSLogo} from './images/mims.svg';
+import {ReactComponent as UmULogo} from './images/umu_logo_left.svg';
+import {ReactComponent as SciLifeLabLogo} from './images/SciLifeLab_Logotype_Green_POS.svg';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import PieChart from "highcharts-react-official";
@@ -997,13 +996,13 @@ class App extends React.Component {
           A comprehensive atlas of high quality&nbsp;<i>Bacillus cereus</i>&nbsp;group genomes with standardized metadata
         </div>
         <div className="App-divider">
-          Filter strains
+          Filter genomes
         </div>
         <div className="withspacer">
           <SearchForm search_callback={this.handleSearch}/>
         </div>
         <div className="App-divider">
-          Selected &nbsp;<i>Bacillus cereus</i>&nbsp; group strains
+          Selected &nbsp;<i>Bacillus cereus</i>&nbsp; group genomes
         </div>
         <div className="withspacer">
             <TheMap query={this.state.query} straindata={this.state.straindata} />
@@ -1015,10 +1014,9 @@ class App extends React.Component {
           <TheTable query={this.state.query} straindata={this.state.straindata} />
         </div>
         <div className="App-footer">
-        <img alt="" src={UmULogo} style={{ height: 80, width:200 }} /> 
-        <img alt="" src={SciLifeLabLogo} style={{ height: 80, width:200 }} /> 
-        <img alt="" src={MIMSLogo} style={{ height: 80, width:200 }} /> 
-        <img alt="" src={UCMRLogo} style={{ height: 80, width:200 }} /> 
+        <UmULogo  style={{ height: 80, width: 200 }}/>
+        <SciLifeLabLogo  style={{ height: 80, width: 200 }}/>
+        <MIMSLogo  style={{ height: 60, width: 150,marginTop: 10 }}/>
         </div>
       </div>
     );
