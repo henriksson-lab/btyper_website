@@ -839,12 +839,20 @@ class TheMap extends React.Component {
                     [1, '#000022']
                 ]
             },
-
+      mapNavigation: {
+        enabled: true,
+        enableDoubleClickZoomTo: true
+      },
+      tooltip: {
+        headerFormat:undefined,
+        pointFormat:'{point.properties.continent}<br><b>{point.name} : {point.value}</b>',
+      },      
+            
       series: [
         {
           mapData: mapDataWorld,
-          name: 'Asia',
-          data: this.data
+          name: '# Genomes',
+          data: this.data,
         }
       ]
     };
