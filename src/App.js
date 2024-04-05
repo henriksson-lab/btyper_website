@@ -158,7 +158,6 @@ class SearchForm extends React.Component {
 
             if(this.state.fields.length===0){
                 this.addFilterNamed([
-                    "Country",
                     "N50",
                     "Completeness",
                     "Contamination"
